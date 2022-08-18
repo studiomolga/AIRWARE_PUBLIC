@@ -59,7 +59,7 @@ static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const unsigned TX_INTERVAL = 1800;
+const unsigned TX_INTERVAL = 60;
 
 // Pin mapping
 //
@@ -186,8 +186,9 @@ void onEvent (ev_t ev) {
             break;
         case EV_TXCOMPLETE:
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-            if (LMIC.txrxFlags & TXRX_ACK)
-              Serial.println(F("Received ack"));
+            Serial.println(LMIC.dataLen);
+//            if (LMIC.txrxFlags & TXRX_ACK)
+//              Serial.println(F("Received ack"));
             if (LMIC.dataLen) {
               Serial.println(F("Received "));
               Serial.println(LMIC.dataLen);
@@ -281,11 +282,13 @@ void setup() {
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
 
-    LMIC_setLinkCheckMode(0);
-//    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
-//    LMIC.dn2Dr = DR_SF12;        // TTN uses SF9 for its RX2 window.
-    LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
-    LMIC_setDrTxpow(DR_SF12,14);
+    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
+
+//    LMIC_setLinkCheckMode(0);
+////    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
+////    LMIC.dn2Dr = DR_SF12;        // TTN uses SF9 for its RX2 window.
+//    LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
+//    LMIC_setDrTxpow(DR_SF12,14);
 //    LMIC_selectSubBand(1);
 
     // Start job (sending automatically starts OTAA too)

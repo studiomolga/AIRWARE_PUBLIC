@@ -8,7 +8,7 @@ import random
 
 TTN_USERNAME = 'lift-test@ttn'
 
-NODE_DB = [{'id': 0, 'lat': 51.497961, 'lng': -0.176515, 'key': 'f3f1005e95f2b68a91b1e2ff2882481b'}]
+NODE_DB = {'eui-9876b6000011b613': {'id': 'eui-9876b6000011b613', 'lat': 51.497961, 'lng': -0.176515, 'key': 'f3f1005e95f2b68a91b1e2ff2882481b'}}
 
 QUALITY_LOW = 0x00
 QUALITY_NORMAL = 0x01
@@ -33,14 +33,15 @@ def on_message(client, userdata, msg):
     print(msg.topic)
     json_str = msg.payload.decode('utf-8')
     data = json.loads(json_str)
-    # print(json.dumps(data, indent=4))
+    #print(json.dumps(data, indent=4))
 
     if msg.topic.endswith('up'):
         process_uplink(data)
 
 
 def validate_uplink(data):
-    if len(data['uplink_message']['decoded_payload']['bytes']) == 1 and data['end_device_ids']['device_id']:
+    print(data)
+    if data['end_device_ids']['device_id']:
         return True
 
     return False
@@ -48,7 +49,7 @@ def validate_uplink(data):
 
 def process_uplink(data):
     if validate_uplink(data):
-        node_id = data['uplink_message']['decoded_payload']['bytes'][0]
+        #node_id = data['uplink_message']['decoded_payload']['bytes'][0]
         device_id = data['end_device_ids']['device_id']
     else:
         return 0
@@ -58,7 +59,7 @@ def process_uplink(data):
     # here should now come a call to a database with all devices and their important api settings, for now it will be faked
     # could be that we end up using some cli program ttn offers to make inqueries to our account for getting devices and
     # then subscribing to their mqtt topics
-    api_data = NODE_DB[node_id]
+    api_data = NODE_DB[device_id]
     api_url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={api_data["key"]}&lat={api_data["lat"]}&lng={api_data["lng"]}&species=no2,o3,pm10,pm25&weighted=1'
 
     response = requests.get(api_url)

@@ -21,7 +21,7 @@ void loop() {
     led[i].update();
   }
 
-  delay(5);
+  //delay(5);
 }
 
 void receiveEvent(int bytes){

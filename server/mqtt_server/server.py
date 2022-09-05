@@ -188,10 +188,10 @@ def on_message(client, userdata, msg):
     if msg_type == 'up':
         print('received uplink')
 
-        payload = json.loads(msg.payload.decode('utf-8'))['uplink_message']['frm_payload']
-        payload = int.from_bytes(base64.b64decode(payload), 'big')
+        # payload = json.loads(msg.payload.decode('utf-8'))['uplink_message']['frm_payload']
+        # payload = int.from_bytes(base64.b64decode(payload), 'big')
 
-        print(f'received uplink from device: {dev_id} with value: {payload}')
+        print(f'received uplink from device: {dev_id}')
         # print(payload)
         # if dev_id in applications[app_id].devices:
         #     if payload == DOWNLINK_SEND:
@@ -200,10 +200,9 @@ def on_message(client, userdata, msg):
         #         applications[app_id].devices[dev_id].do_send_downlink = False
 
 
-def check_devices(apps):
-    # print('checking for new devices')
-    for key in apps:
-        apps[key].set_devices()
+def check_devices():
+    for key in applications:
+        applications[key].set_devices()
 
 
 def send_downlinks():
@@ -223,7 +222,7 @@ if __name__ == '__main__':
             application = Application(application_id, application[application_id])
             applications[application_id] = application
 
-    schedule.every().hour.at(':00').do(check_devices, applications)
+    schedule.every().hour.at(':00').do(check_devices)
     schedule.every().hour.at(':30').do(set_air_qualities)
     schedule.every(5).minutes.do(send_downlinks)
 

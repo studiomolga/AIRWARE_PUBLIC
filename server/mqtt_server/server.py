@@ -1,7 +1,8 @@
 import argparse
 import base64
 import socket
-
+import datetime
+import pytz
 import requests
 import schedule
 import json
@@ -58,7 +59,7 @@ class Location:
 
 
 class Device:
-    def __init__(self, dev_eui, dev_id, location, aq_lookup, aq_api_key='f3f1005e95f2b68a91b1e2ff2882481b'):
+    def __init__(self, dev_eui, dev_id, location, aq_lookup, aq_api_key='abcadd63c241ef1e6d56d58cc1a2b0d4'):
         self.dev_eui = dev_eui
         self.dev_id = dev_id
         self.location = location
@@ -73,7 +74,13 @@ class Device:
 
     def set_air_quality(self):
         if self.location is not None:
-            url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&weighted=1'
+            # tz = pytz.timezone('GMT')
+            timestamp = datetime.datetime.utcnow()
+            # timestamp = tz.localize(timestamp)
+            timestamp = timestamp - datetime.timedelta(hours=2)
+            timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
+            print(timestamp)
+            url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'
 
             try:
                 response = requests.get(url)
@@ -86,6 +93,9 @@ class Device:
 
             # print(json.dumps(response.json(), indent=4))
             data = self.process_aq_data(response.json())
+            if len(data.keys()) == 0:
+                return
+
             print(data)
             air_quality = 0
             for key in data:
@@ -101,7 +111,8 @@ class Device:
         processed_data = {}
 
         for result in results:
-            processed_data[result['species']] = result['value']
+            if 'nowcast_value' in result:
+                processed_data[result['species']] = result['nowcast_value']
 
         return processed_data
 
@@ -222,8 +233,8 @@ if __name__ == '__main__':
             application = Application(application_id, application[application_id])
             applications[application_id] = application
 
-    schedule.every().hour.at(':00').do(check_devices)
-    schedule.every().hour.at(':30').do(set_air_qualities)
+    schedule.every().minute.at(':00').do(check_devices)
+    schedule.every().minute.at(':30').do(set_air_qualities)
     schedule.every(5).minutes.do(send_downlinks)
 
     while True:

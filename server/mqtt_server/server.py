@@ -233,8 +233,8 @@ if __name__ == '__main__':
             application = Application(application_id, application[application_id])
             applications[application_id] = application
 
-    schedule.every().minute.at(':00').do(check_devices)
-    schedule.every().minute.at(':30').do(set_air_qualities)
+    schedule.every().hour.at(':00').do(check_devices)
+    schedule.every().hour.at(':30').do(set_air_qualities)
     schedule.every(5).minutes.do(send_downlinks)
 
     while True:

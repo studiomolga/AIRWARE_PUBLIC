@@ -77,7 +77,7 @@ class Device:
             # tz = pytz.timezone('GMT')
             timestamp = datetime.datetime.utcnow()
             # timestamp = tz.localize(timestamp)
-            timestamp = timestamp - datetime.timedelta(hours=2)
+            timestamp = timestamp - datetime.timedelta(hours=1)
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
             print(timestamp)
             url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'

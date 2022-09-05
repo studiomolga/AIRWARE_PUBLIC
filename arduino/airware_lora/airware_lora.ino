@@ -35,31 +35,42 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
-#include <Wire.h>
+//#include <Wire.h>
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
 // the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
 // 0x70.
-static const u1_t PROGMEM APPEUI[8]= { 0xDD, 0x93, 0x88, 0x57, 0x9A, 0x8D, 0x01, 0xDC };
+
+//static const u1_t PROGMEM APPEUI[8]= { 0x61, 0x67, 0xDD, 0x23, 0x55, 0x46, 0xE3, 0xFE };
+//static const u1_t PROGMEM APPEUI[8]= { 0xDD, 0x93, 0x88, 0x57, 0x9A, 0x8D, 0x01, 0xDC };
+static const u1_t PROGMEM APPEUI[8]= { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 // This should also be in little endian format, see above.
-static const u1_t PROGMEM DEVEUI[8]= { 0x13, 0xB6, 0x11, 0x00, 0x00, 0xB6, 0x76, 0x98 };
+//static const u1_t PROGMEM DEVEUI[8]= { 0x9C, 0x46, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
+//static const u1_t PROGMEM DEVEUI[8]= { 0x13, 0xB6, 0x11, 0x00, 0x00, 0xB6, 0x76, 0x98 };
+static const u1_t PROGMEM DEVEUI[8]= { 0xD1, 0x4B, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
 // This key should be in big endian format (or, since it is not really a
 // number but a block of memory, endianness does not really apply). In
 // practice, a key taken from the TTN console can be copied as-is.
-static const u1_t PROGMEM APPKEY[16] = { 0x18, 0xED, 0xF3, 0x55, 0x98, 0x11, 0xD9, 0x5D, 0xE1, 0x30, 0xF1, 0x4A, 0x96, 0xAF, 0x32, 0xB7 };
+//static const u1_t PROGMEM APPKEY[16] = { 0x3A, 0xA3, 0xDA, 0x7C, 0x0D, 0xAD, 0x4D, 0x75, 0x83, 0x3D, 0x32, 0x47, 0xAA, 0xA0, 0x51, 0x33 };
+//static const u1_t PROGMEM APPKEY[16] = { 0x18, 0xED, 0xF3, 0x55, 0x98, 0x11, 0xD9, 0x5D, 0xE1, 0x30, 0xF1, 0x4A, 0x96, 0xAF, 0x32, 0xB7 };
+static const u1_t PROGMEM APPKEY[16] = { 0xFE, 0xA7, 0xB1, 0xA7, 0x50, 0x96, 0x15, 0x0E, 0xB9, 0xCB, 0x0F, 0x0E, 0x54, 0x47, 0xBC, 0xC1 };
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
 
-static uint8_t mydata[] = { 0 };    //we just send an ID every minute, this ID is registered in a database with all the things needed for making the api call and sending data back
+//static uint8_t dataOff[] = { 1 };
+static uint8_t data[] = { 0 };    //we just send an ID every minute, this ID is registered in a database with all the things needed for making the api call and sending data back
 static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const unsigned TX_INTERVAL = 60;
+const unsigned TX_INTERVAL_SHORT = 300;   //adjust these times to something reasonable, this is for testing 
+const unsigned TX_INTERVAL_LONG = 3600;
+unsigned long recvTime = 0;
+bool dataRecv = false;
 
 // Pin mapping
 //
@@ -190,6 +201,7 @@ void onEvent (ev_t ev) {
 //            if (LMIC.txrxFlags & TXRX_ACK)
 //              Serial.println(F("Received ack"));
             if (LMIC.dataLen) {
+//              recvTime = millis();
               Serial.println(F("Received "));
               Serial.println(LMIC.dataLen);
               Serial.println(F(" bytes of payload"));
@@ -198,12 +210,17 @@ void onEvent (ev_t ev) {
                 Serial.println(LMIC.frame[LMIC.dataBeg + i]);
                 buf[i] = LMIC.frame[LMIC.dataBeg + i];
               }
-              Wire.beginTransmission(9);
-              Wire.write(buf, LMIC.dataLen);
-              Wire.endTransmission();
+//              Wire.beginTransmission(9);
+//              Wire.write(buf, LMIC.dataLen);
+//              Wire.endTransmission();
             }
             // Schedule next transmission
-            os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
+            if (LMIC.dataLen){
+              os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL_LONG), do_send);
+            } else {
+              os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL_SHORT), do_send);
+            }
+                     
             break;
         case EV_LOST_TSYNC:
             Serial.println(F("EV_LOST_TSYNC"));
@@ -249,13 +266,25 @@ void onEvent (ev_t ev) {
     }
 }
 
+//void do_send_on(osjob_t* j){
+//    // Check if there is not a current TX/RX job running
+//    if (LMIC.opmode & OP_TXRXPEND) {
+//        Serial.println(F("OP_TXRXPEND, not sending"));
+//    } else {
+//        // Prepare upstream data transmission at the next possible time.
+//        LMIC_setTxData2(1, dataOn, sizeof(dataOn), 0);
+//        Serial.println(F("Packet queued"));
+//    }
+//    // Next TX is scheduled after TX_COMPLETE event.
+//}
+
 void do_send(osjob_t* j){
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
         // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, mydata, sizeof(mydata), 0);
+        LMIC_setTxData2(1, data, sizeof(data), 0);
         Serial.println(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
@@ -275,20 +304,20 @@ void setup() {
     delay(1000);
     #endif
 
-    Wire.begin();
+//    Wire.begin();
 
     // LMIC init
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
 
-    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
+//    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
 
 //    LMIC_setLinkCheckMode(0);
 ////    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
 ////    LMIC.dn2Dr = DR_SF12;        // TTN uses SF9 for its RX2 window.
-//    LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
-//    LMIC_setDrTxpow(DR_SF12,14);
+    LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
+    LMIC_setDrTxpow(DR_SF12,14);
 //    LMIC_selectSubBand(1);
 
     // Start job (sending automatically starts OTAA too)
@@ -296,5 +325,9 @@ void setup() {
 }
 
 void loop() {
-    os_runloop_once();
+//  if(dataRecv && millis() - recvTime > 1800 ){
+//    dataRecv = false;
+//  }
+  
+  os_runloop_once();
 }

@@ -64,7 +64,7 @@ class Device:
         self.dev_id = dev_id
         self.location = location
         self.aq_api_key = aq_api_key
-        self.do_send_downlink = True
+        # self.do_send_downlink = True
         self.air_quality = 0
         self.aq_loookup = aq_lookup
         self._daqi_order = ['no2', 'o3', 'pm10', 'pm25']
@@ -166,16 +166,18 @@ class Application:
     def send_downlinks(self):
         for key in self.devices:
             device = self.devices[key]
-            if device.do_send_downlink:
-                payload = base64.b64encode(device.air_quality.to_bytes(length=1, byteorder='little'))
-                msg = '{"downlinks": [{"f_port": 15,"frm_payload": "' + payload.decode() + '","priority": "NORMAL"}]}'
-                topic = f'v3/{self.app_id}@ttn/devices/{device.dev_id}/down/replace'
-                try:
-                    publish.single(topic, msg, hostname=TTN_MQTT_HOST, port=TTN_MQTT_PORT,
-                                   auth={'username': f'{self.app_id}@ttn',
-                                         'password': self.api_key})
-                except socket.timeout as err:
-                    print(f'socket timedout withh err: {err}, downlink not scheduled')
+            # if device.do_send_downlink:
+            payload = base64.b64encode(device.air_quality.to_bytes(length=1, byteorder='little'))
+            msg = '{"downlinks": [{"f_port": 15,"frm_payload": "' + payload.decode() + '","priority": "NORMAL"}]}'
+            topic = f'v3/{self.app_id}@ttn/devices/{device.dev_id}/down/replace'
+            try:
+                publish.single(topic, msg, hostname=TTN_MQTT_HOST, port=TTN_MQTT_PORT,
+                               auth={'username': f'{self.app_id}@ttn',
+                                     'password': self.api_key})
+            except socket.timeout as err:
+                print(f'socket timedout withh err: {err}, downlink not scheduled')
+            except ConnectionRefusedError as err:
+                print(f'connection was refused when publishing a downlink on device: {device.dev_id} with error: {err}')
 
     def set_air_qualities(self):
         for key in self.devices:

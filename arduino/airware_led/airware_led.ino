@@ -27,12 +27,12 @@ void loop() {
 
 void receiveEvent(int bytes){
   // we do some check whether we are getting data in the form we expect
-  Serial.println("received bytes");
+//  Serial.println("received bytes");
   if(bytes == 1){
     uint8_t vals = Wire.read();
     for(int i = 0; i < 4; i++)
     {
-        uint8_t val = (vals >> (i * 2)) & 3;
+        uint8_t val = (vals >> (i * 4)) & 15;
         led[i].setQuality(val);
         Serial.print("id: ");
         Serial.print(i);

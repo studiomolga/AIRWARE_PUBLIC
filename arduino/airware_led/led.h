@@ -16,24 +16,42 @@ class Led {
       pin = p;
       pinMode(pin, OUTPUT);
       startTime = 0;
-      duration = BLINK_DURATION_SLOW;
-      onDuration = BLINK_DURATION_SLOW;
+      duration = BLINK_DURATION_LOW_1;
+      onDuration = BLINK_DURATION_LOW_1;
       ledState = LED_ON;
     }
 
     void setQuality(uint8_t q){
       switch(q){
-        case QUALITY_LOW:
-          onDuration = BLINK_DURATION_SLOW;
+        case QUALITY_LOW_1:
+          onDuration = BLINK_DURATION_LOW_1;
           break;
-        case QUALITY_MODERATE:
-          onDuration = BLINK_DURATION_MEDIUM;
+        case QUALITY_LOW_2:
+          onDuration = BLINK_DURATION_LOW_2;
           break;
-        case QUALITY_HIGH:
-          onDuration = BLINK_DURATION_FAST;
+        case QUALITY_LOW_3:
+          onDuration = BLINK_DURATION_LOW_3;
           break;
-        case QUALITY_VERY_HIGH:
-          onDuration = BLINK_DURATION_VERY_FAST;
+        case QUALITY_MODERATE_4:
+          onDuration = BLINK_DURATION_MODERATE_4;
+          break;
+        case QUALITY_MODERATE_5:
+          onDuration = BLINK_DURATION_MODERATE_5;
+          break;
+        case QUALITY_MODERATE_6:
+          onDuration = BLINK_DURATION_MODERATE_6;
+          break;
+        case QUALITY_HIGH_7:
+          onDuration = BLINK_DURATION_HIGH_7;
+          break;
+        case QUALITY_HIGH_8:
+          onDuration = BLINK_DURATION_HIGH_8;
+          break;
+        case QUALITY_HIGH_9:
+          onDuration = BLINK_DURATION_HIGH_9;
+          break;
+        case QUALITY_VERY_HIGH_10:
+          onDuration = BLINK_DURATION_VERY_HIGH_10;
           break;
       }
     }

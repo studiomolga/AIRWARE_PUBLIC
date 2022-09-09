@@ -2,7 +2,6 @@ import argparse
 import base64
 import socket
 import datetime
-import pytz
 import requests
 import schedule
 import json
@@ -21,10 +20,10 @@ TTN_MQTT_PORT = 1883
 
 class AirQualityLookUp:
     def __init__(self):
-        self.pm10 = [0, 51, 76, 101]
-        self.pm25 = [0, 36, 54, 71]
-        self.no2 = [0, 201, 401, 601]
-        self.o3 = [0, 81, 161, 241]
+        self.pm10 = [0, 17, 34, 51, 59, 67, 76, 84, 92, 101]
+        self.pm25 = [0, 12, 24, 36, 42, 47, 54, 59, 65, 71]
+        self.no2 = [0, 67, 134, 201, 268, 335, 401, 468, 535, 601]
+        self.o3 = [0, 27, 54, 81, 108, 135, 161, 188, 214, 241]
 
     def _get_ranges(self, pollutant):
         if pollutant == 'pm10':
@@ -74,9 +73,7 @@ class Device:
 
     def set_air_quality(self):
         if self.location is not None:
-            # tz = pytz.timezone('GMT')
             timestamp = datetime.datetime.utcnow()
-            # timestamp = tz.localize(timestamp)
             timestamp = timestamp - datetime.timedelta(hours=1)
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
             print(timestamp)
@@ -100,7 +97,7 @@ class Device:
             air_quality = 0
             for key in data:
                 daqi_level = self.aq_loookup.get_daqi_level(key, data[key])
-                offset = self._daqi_order.index(key) * 2
+                offset = self._daqi_order.index(key) * 4
                 air_quality += (daqi_level << offset)
                 print(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {air_quality}, bits: {bin(air_quality)}')
 
@@ -167,7 +164,7 @@ class Application:
         for key in self.devices:
             device = self.devices[key]
             # if device.do_send_downlink:
-            payload = base64.b64encode(device.air_quality.to_bytes(length=1, byteorder='little'))
+            payload = base64.b64encode(device.air_quality.to_bytes(length=2, byteorder='little'))
             msg = '{"downlinks": [{"f_port": 15,"frm_payload": "' + payload.decode() + '","priority": "NORMAL"}]}'
             topic = f'v3/{self.app_id}@ttn/devices/{device.dev_id}/down/replace'
             try:
@@ -235,8 +232,8 @@ if __name__ == '__main__':
             application = Application(application_id, application[application_id])
             applications[application_id] = application
 
-    schedule.every().hour.at(':00').do(check_devices)
-    schedule.every().hour.at(':30').do(set_air_qualities)
+    schedule.every().minute.at(':00').do(check_devices)
+    schedule.every().minute.at(':30').do(set_air_qualities)
     schedule.every(5).minutes.do(send_downlinks)
 
     while True:

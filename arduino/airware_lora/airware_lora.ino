@@ -70,7 +70,7 @@ static osjob_t sendjob;
 const unsigned TX_INTERVAL_SHORT = 300;   //adjust these times to something reasonable, this is for testing 
 const unsigned TX_INTERVAL_LONG = 3600;
 unsigned long recvTime = 0;
-bool dataRecv = false;
+bool firstRun = true;
 
 // Pin mapping
 //
@@ -201,7 +201,6 @@ void onEvent (ev_t ev) {
 //            if (LMIC.txrxFlags & TXRX_ACK)
 //              Serial.println(F("Received ack"));
             if (LMIC.dataLen) {
-//              recvTime = millis();
               Serial.println(F("Received "));
               Serial.println(LMIC.dataLen);
               Serial.println(F(" bytes of payload"));
@@ -215,7 +214,8 @@ void onEvent (ev_t ev) {
               Wire.endTransmission();
             }
             // Schedule next transmission
-            if (LMIC.dataLen){
+            if (LMIC.dataLen || firstRun){
+              firstRun = false;
               os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL_LONG), do_send);
             } else {
               os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL_SHORT), do_send);
@@ -266,18 +266,6 @@ void onEvent (ev_t ev) {
     }
 }
 
-//void do_send_on(osjob_t* j){
-//    // Check if there is not a current TX/RX job running
-//    if (LMIC.opmode & OP_TXRXPEND) {
-//        Serial.println(F("OP_TXRXPEND, not sending"));
-//    } else {
-//        // Prepare upstream data transmission at the next possible time.
-//        LMIC_setTxData2(1, dataOn, sizeof(dataOn), 0);
-//        Serial.println(F("Packet queued"));
-//    }
-//    // Next TX is scheduled after TX_COMPLETE event.
-//}
-
 void do_send(osjob_t* j){
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) {
@@ -312,22 +300,15 @@ void setup() {
     LMIC_reset();
 
 //    LMIC_setClockError(MAX_CLOCK_ERROR * 10 / 100);
-
 //    LMIC_setLinkCheckMode(0);
-////    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
-////    LMIC.dn2Dr = DR_SF12;        // TTN uses SF9 for its RX2 window.
+
     LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
     LMIC_setDrTxpow(DR_SF12,14);
-//    LMIC_selectSubBand(1);
 
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);
 }
 
 void loop() {
-//  if(dataRecv && millis() - recvTime > 1800 ){
-//    dataRecv = false;
-//  }
-  
   os_runloop_once();
 }

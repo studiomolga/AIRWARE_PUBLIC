@@ -35,7 +35,7 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
-//#include <Wire.h>
+#include <Wire.h>
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
@@ -210,9 +210,9 @@ void onEvent (ev_t ev) {
                 Serial.println(LMIC.frame[LMIC.dataBeg + i]);
                 buf[i] = LMIC.frame[LMIC.dataBeg + i];
               }
-//              Wire.beginTransmission(9);
-//              Wire.write(buf, LMIC.dataLen);
-//              Wire.endTransmission();
+              Wire.beginTransmission(9);
+              Wire.write(buf, LMIC.dataLen);
+              Wire.endTransmission();
             }
             // Schedule next transmission
             if (LMIC.dataLen){
@@ -304,7 +304,7 @@ void setup() {
     delay(1000);
     #endif
 
-//    Wire.begin();
+    Wire.begin();
 
     // LMIC init
     os_init();

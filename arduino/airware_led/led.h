@@ -24,13 +24,16 @@ class Led {
     void setQuality(uint8_t q){
       switch(q){
         case QUALITY_LOW:
-          onDuration = BLINK_DURATION_FAST;
+          onDuration = BLINK_DURATION_SLOW;
           break;
-        case QUALITY_NORMAL:
+        case QUALITY_MODERATE:
           onDuration = BLINK_DURATION_MEDIUM;
           break;
         case QUALITY_HIGH:
-          onDuration = BLINK_DURATION_SLOW;
+          onDuration = BLINK_DURATION_FAST;
+          break;
+        case QUALITY_VERY_HIGH:
+          onDuration = BLINK_DURATION_VERY_FAST;
           break;
       }
     }

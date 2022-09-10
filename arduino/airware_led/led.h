@@ -54,6 +54,8 @@ class Led {
           onDuration = BLINK_DURATION_VERY_HIGH_10;
           break;
       }
+      startTime = millis();
+      ledState = LED_ON;
     }
 
     void update(){

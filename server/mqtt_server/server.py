@@ -129,6 +129,8 @@ class Application:
 
         self.devices = {}
 
+        self.set_devices()
+
     def set_devices(self):
         url = f'https://eu1.cloud.thethings.network/api/v3/applications/{self.app_id}/devices?field_mask=locations'
         headers = {'Authorization': f'Bearer {self.api_key}',

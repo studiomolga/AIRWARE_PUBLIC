@@ -172,9 +172,11 @@ class Application:
                                auth={'username': f'{self.app_id}@ttn',
                                      'password': self.api_key})
             except socket.timeout as err:
-                print(f'socket timedout withh err: {err}, downlink not scheduled')
+                print(f'socket timed out withh err: {err}, downlink not scheduled')
             except ConnectionRefusedError as err:
                 print(f'connection was refused when publishing a downlink on device: {device.dev_id} with error: {err}')
+            except socket.gaierror as err:
+                print(f'could not publish downlink due to the following error: {err}')
 
     def set_air_qualities(self):
         for key in self.devices:
@@ -232,8 +234,8 @@ if __name__ == '__main__':
             application = Application(application_id, application[application_id])
             applications[application_id] = application
 
-    schedule.every().minute.at(':00').do(check_devices)
-    schedule.every().minute.at(':30').do(set_air_qualities)
+    schedule.every().hour.at(':00').do(check_devices)
+    schedule.every().hour.at(':30').do(set_air_qualities)
     schedule.every(5).minutes.do(send_downlinks)
 
     while True:

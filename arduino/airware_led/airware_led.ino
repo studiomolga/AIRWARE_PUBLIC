@@ -45,15 +45,4 @@ void receiveEvent(int bytes){
       Serial.println();  
     }
   }
-//  Serial.println(bytes);
-//  for(int i = 0; i < bytes; i++){
-//    uint8_t val = Wire.read();
-//    led[i].setQuality(val);
-//    Serial.print("id: ");
-//    Serial.print(i);
-//    Serial.print(", val: ");
-//    Serial.print(val);
-//    if(i < bytes - 1) Serial.print(" | ");
-//  }
-//  Serial.println();
 }

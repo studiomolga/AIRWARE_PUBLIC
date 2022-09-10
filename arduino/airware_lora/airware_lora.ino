@@ -67,7 +67,7 @@ static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const unsigned TX_INTERVAL_SHORT = 300;   //adjust these times to something reasonable, this is for testing 
+const unsigned TX_INTERVAL_SHORT = 200;   //adjust these times to something reasonable, this is for testing 
 const unsigned TX_INTERVAL_LONG = 3600;
 unsigned long recvTime = 0;
 bool firstRun = true;
@@ -206,7 +206,8 @@ void onEvent (ev_t ev) {
               Serial.println(F(" bytes of payload"));
               byte buf[LMIC.dataLen];
               for(int i = 0; i < LMIC.dataLen; i++){
-                Serial.println(LMIC.frame[LMIC.dataBeg + i]);
+                Serial.println(LMIC.frame[LMIC.dataBeg + i], HEX);
+                Serial.println(LMIC.frame[LMIC.dataBeg + i], BIN);
                 buf[i] = LMIC.frame[LMIC.dataBeg + i];
               }
               Wire.beginTransmission(9);

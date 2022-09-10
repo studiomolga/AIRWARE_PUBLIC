@@ -66,7 +66,7 @@ class Device:
         # self.do_send_downlink = True
         self.air_quality = 0
         self.aq_loookup = aq_lookup
-        self._daqi_order = ['no2', 'o3', 'pm10', 'pm25']
+        self._daqi_order = ['pm10', 'pm25', 'no2', 'o3']
 
     def __repr__(self):
         return f'device eui: {self.dev_eui}, device id: {self.dev_id}, location: {self.location}'
@@ -130,6 +130,7 @@ class Application:
         self.devices = {}
 
         self.set_devices()
+        self.set_air_qualities()
 
     def set_devices(self):
         url = f'https://eu1.cloud.thethings.network/api/v3/applications/{self.app_id}/devices?field_mask=locations'

@@ -1,11 +1,6 @@
 #include <Wire.h>
 #include "led.h"
 
-//uint8_t no2 = 0;
-//uint8_t o3 = 0;
-//uint8_t pm10 = 0;
-//uint8_t pm25 = 0;
-unsigned long pauseTime = 0;
 Led led[] = {(12), (11), (10), (9)};
 
 void setup() {
@@ -17,12 +12,9 @@ void setup() {
 }
 
 void loop() {
-  //Serial.println("test");
   for(int i = 0; i < 4; i++){
     led[i].update();
   }
-
-  //delay(5);
 }
 
 void receiveEvent(int bytes){

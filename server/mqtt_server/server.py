@@ -7,6 +7,7 @@ import schedule
 import json
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
+from paho.mqtt import MQTTException
 from requests.exceptions import SSLError
 
 #TODO: some choices that we need to make at some point will determine our options for dealing with applications adn api keys
@@ -180,6 +181,8 @@ class Application:
                 print(f'connection was refused when publishing a downlink on device: {device.dev_id} with error: {err}')
             except socket.gaierror as err:
                 print(f'could not publish downlink due to the following error: {err}')
+            except MQTTException as err:
+                print(f'publish failed with mqtt error: {err}')
 
     def set_air_qualities(self):
         for key in self.devices:

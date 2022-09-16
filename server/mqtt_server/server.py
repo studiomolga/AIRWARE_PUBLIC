@@ -41,6 +41,9 @@ class AirQualityLookUp:
     def get_daqi_level(self, pollutant, value):
         ranges = self._get_ranges(pollutant)
 
+        if value < 0:
+            return 0
+
         if value >= ranges[-1]:
             return len(ranges) - 1
 

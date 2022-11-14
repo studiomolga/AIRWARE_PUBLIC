@@ -108,8 +108,13 @@ class Device:
             self.air_quality = air_quality
 
     def process_aq_data(self, data):
-        results = data['results']
         processed_data = {}
+        
+        try:
+            results = data['results']
+        except KeyError as err: 
+            print(f'key error on air quality return: {err}')
+            return processed_data
 
         for result in results:
             if 'nowcast_value' in result:

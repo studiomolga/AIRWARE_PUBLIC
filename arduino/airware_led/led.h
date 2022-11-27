@@ -58,6 +58,10 @@ class Led {
       ledState = LED_ON;
     }
 
+    void turnOff(){
+      digitalWrite(pin, LOW);
+    }
+
     void update(){
       unsigned long currTime = millis();
 

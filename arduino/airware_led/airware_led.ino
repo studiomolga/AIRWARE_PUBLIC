@@ -11,6 +11,7 @@ Led led[] = {(12), (11), (9), (5)};
 #define ON 0
 #define OFF 1
 #define MAX_MESSAGE_LENGTH 2
+#define SLEEPING_PIN 6
 
 RTC_DS3231 rtc;
 volatile uint8_t interruptState;
@@ -49,10 +50,13 @@ void setup() {
   rtc.disableAlarm(2);
 
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, LOW);
 
   rtc.setAlarm1(DateTime(2020, 6, 25, OFF_HOUR, 0, 0), DS3231_A1_Hour);
   interruptState = OFF;
+
+  pinMode(SLEEPING_PIN, OUTPUT);
+  digitalWrite(SLEEPING_PIN, HIGH);
 }
 
 void loop() {
@@ -118,7 +122,8 @@ ISR (PCINT0_vect) {
 
 void onSleep() {
   Serial.println("sleep occured!");
-  digitalWrite(LED_BUILTIN, LOW);
+//  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(SLEEPING_PIN, LOW);
   rtc.setAlarm1(DateTime(2020, 6, 25, ON_HOUR, 0, 0), DS3231_A1_Hour);
   rtc.clearAlarm(1);
 
@@ -138,7 +143,8 @@ void onSleep() {
   Wire.begin();
   Wire.onReceive(receiveEvent);
   interruptState = OFF;
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(SLEEPING_PIN, HIGH);
+//  digitalWrite(LED_BUILTIN, HIGH);
   rtc.setAlarm1(DateTime(2020, 6, 25, OFF_HOUR, 0, 0), DS3231_A1_Hour);
   rtc.clearAlarm(1);
 }

@@ -39,8 +39,10 @@
 #include <Adafruit_SleepyDog.h>
 #include <Arduino.h>
 
-#define VBATPIN A7
+#define VBATPIN A4
 #define BUFFER_SIZE 2
+#define SLEEPING_PIN 12
+#define MAX_TRIES 3
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
@@ -85,6 +87,7 @@ bool hasSend = false;
 bool hasReceived = false;
 uint16_t loops = 0;
 byte buf[BUFFER_SIZE];
+uint8_t tries = 0;
 
 // Pin mapping
 //
@@ -296,6 +299,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("Starting"));
 
+  pinMode(SLEEPING_PIN, INPUT);
+  
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH); // Show we're awake
 
@@ -324,14 +329,15 @@ void loop() {
     Wire.endTransmission();
     delay(100);
     hasReceived = false;
+    tries = 0;
   }
 
   uint16_t txInterval = TX_INTERVAL_LONG;
-  if (!hasSend) {
+  if (!hasSend && tries < MAX_TRIES) {
     txInterval = TX_INTERVAL_SHORT;
   }
 
-  if ((loops * 10) > txInterval) {
+  if ((loops * 10) > txInterval && digitalRead(SLEEPING_PIN) == HIGH) {
     shouldSend = true;
     Serial.println("time to send");
   }
@@ -340,6 +346,7 @@ void loop() {
     shouldSend = false;
     isSleep = false;
     loops = 0;
+    tries++;
     do_send(&sendjob);
   }
 

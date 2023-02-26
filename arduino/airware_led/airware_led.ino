@@ -3,6 +3,7 @@
 #include "RTClib.h"
 #include <avr/sleep.h>
 
+Led testLed(4);
 Led led[] = {(12), (11), (9), (5)};
 
 #define CLOCK_INTERRUPT_PIN 10

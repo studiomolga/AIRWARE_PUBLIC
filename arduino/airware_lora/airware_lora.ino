@@ -35,30 +35,27 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
-#include <Wire.h>
 #include <Adafruit_SleepyDog.h>
 #include <Arduino.h>
+#include "RTClib.h"
 
+#define NUM_LEDS 10
 #define VBATPIN A4
-#define BUFFER_SIZE 2
-#define SLEEPING_PIN 12
+#define BUFFER_SIZE 1
 #define MAX_TRIES 3
+#define NUM_PARTS 4
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
 // the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
 // 0x70.
 
-//static const u1_t PROGMEM APPEUI[8]= { 0x61, 0x67, 0xDD, 0x23, 0x55, 0x46, 0xE3, 0xFE };
-//static const u1_t PROGMEM APPEUI[8]= { 0xDD, 0x93, 0x88, 0x57, 0x9A, 0x8D, 0x01, 0xDC };
 static const u1_t PROGMEM APPEUI[8] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 void os_getArtEui (u1_t* buf) {
   memcpy_P(buf, APPEUI, 8);
 }
 
 // This should also be in little endian format, see above.
-//static const u1_t PROGMEM DEVEUI[8]= { 0x9C, 0x46, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
-//static const u1_t PROGMEM DEVEUI[8]= { 0x13, 0xB6, 0x11, 0x00, 0x00, 0xB6, 0x76, 0x98 };
 static const u1_t PROGMEM DEVEUI[8] = { 0xD1, 0x4B, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
 void os_getDevEui (u1_t* buf) {
   memcpy_P(buf, DEVEUI, 8);
@@ -67,14 +64,11 @@ void os_getDevEui (u1_t* buf) {
 // This key should be in big endian format (or, since it is not really a
 // number but a block of memory, endianness does not really apply). In
 // practice, a key taken from the TTN console can be copied as-is.
-//static const u1_t PROGMEM APPKEY[16] = { 0x3A, 0xA3, 0xDA, 0x7C, 0x0D, 0xAD, 0x4D, 0x75, 0x83, 0x3D, 0x32, 0x47, 0xAA, 0xA0, 0x51, 0x33 };
-//static const u1_t PROGMEM APPKEY[16] = { 0x18, 0xED, 0xF3, 0x55, 0x98, 0x11, 0xD9, 0x5D, 0xE1, 0x30, 0xF1, 0x4A, 0x96, 0xAF, 0x32, 0xB7 };
 static const u1_t PROGMEM APPKEY[16] = { 0xFE, 0xA7, 0xB1, 0xA7, 0x50, 0x96, 0x15, 0x0E, 0xB9, 0xCB, 0x0F, 0x0E, 0x54, 0x47, 0xBC, 0xC1 };
 void os_getDevKey (u1_t* buf) {
   memcpy_P(buf, APPKEY, 16);
 }
 
-//static uint8_t dataOff[] = { 1 };
 static uint8_t data[] = { 0 };    //we just send an ID every minute, this ID is registered in a database with all the things needed for making the api call and sending data back
 static osjob_t sendjob;
 
@@ -87,7 +81,14 @@ bool hasSend = false;
 bool hasReceived = false;
 uint16_t loops = 0;
 byte buf[BUFFER_SIZE];
+uint8_t ledPins[] = {5, 9, 10, 12, 13, 14, 15, 16, 17, 19};
 uint8_t tries = 0;
+uint8_t nowcast = 0;
+uint8_t futurecast = 0;
+uint8_t currNowcast = 0;
+uint8_t currFuturecast = 0;
+
+RTC_DS3231 rtc;
 
 // Pin mapping
 //
@@ -216,14 +217,13 @@ void onEvent (ev_t ev) {
     case EV_TXCOMPLETE:
       Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
       hasSend = false;
-      if (LMIC.dataLen == 2) {
+      if (LMIC.dataLen == BUFFER_SIZE) {
         Serial.println(F("Received "));
         Serial.println(LMIC.dataLen);
         Serial.println(F(" bytes of payload"));
-        for (int i = 0; i < LMIC.dataLen; i++) {
-          Serial.println(LMIC.frame[LMIC.dataBeg + i], HEX);
-          buf[i] = LMIC.frame[LMIC.dataBeg + i];
-        }
+        nowcast = b & 15;
+        futurecast = (b >> 4) & 15;
+        
         hasSend = true;
         hasReceived = true;
       }
@@ -297,14 +297,26 @@ void setup() {
   //    while (! Serial)
   //        ;
   Serial.begin(9600);
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+
+  if (rtc.lostPower()) {
+    Serial.println("RTC lost power, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+  
   Serial.println(F("Starting"));
 
-  pinMode(SLEEPING_PIN, INPUT);
-  
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake
-
-  Wire.begin();
+  // set the pinmode for all the leds
+  for(int i = 0; i < NUM_LEDS; i++){
+    pinMode(ledPins[i], OUTPUT);
+  }
 
   // LMIC init
   os_init();
@@ -324,10 +336,21 @@ void loop() {
   os_runloop_once();
 
   if (hasReceived){
-    Wire.beginTransmission(9);
-    Wire.write(buf, BUFFER_SIZE);
-    Wire.endTransmission();
-    delay(100);
+    // check whether we need to update the nowcast
+    if(currNowcast != nowcast){
+      // set new led position
+      digitalWrite(ledPins[currNowcast], LOW);
+      digitalWrite(lefPins[nowcast], HIGH);
+      currNowcast = nowcast;
+      
+      // set new motor angle destination
+    }
+
+    // check whether we need to update the futurecast
+    if(currFuturecast != futurecast){
+      // what should futurecast do?
+    }
+    
     hasReceived = false;
     tries = 0;
   }
@@ -337,7 +360,7 @@ void loop() {
     txInterval = TX_INTERVAL_SHORT;
   }
 
-  if ((loops * 10) > txInterval && digitalRead(SLEEPING_PIN) == HIGH) {
+  if ((loops * 10) > txInterval) {
     shouldSend = true;
     Serial.println("time to send");
   }
@@ -359,7 +382,5 @@ void loop() {
 
 void doSleep() {
   // sleepydog sleeping
-  digitalWrite(LED_BUILTIN, LOW); // Show we're asleep
   int sleepMS = Watchdog.sleep(10000);
-  digitalWrite(LED_BUILTIN, HIGH);
 }

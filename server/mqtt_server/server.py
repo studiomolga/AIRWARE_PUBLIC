@@ -68,19 +68,20 @@ class Device:
         self.location = location
         self.aq_api_key = aq_api_key
         # self.do_send_downlink = True
-        self.air_quality = 0
+        self.nowcast = 0
+        self.futurecast = 0
         self.aq_loookup = aq_lookup
         self._daqi_order = ['no2', 'o3', 'pm10', 'pm25']
 
     def __repr__(self):
         return f'device eui: {self.dev_eui}, device id: {self.dev_id}, location: {self.location}'
 
-    def set_air_quality(self):
+    def set_nowcast(self):
         if self.location is not None:
             timestamp = datetime.datetime.utcnow()
             timestamp = timestamp - datetime.timedelta(hours=1)
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
-            print(timestamp)
+            #print(timestamp)
             url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'
 
             try:
@@ -97,15 +98,18 @@ class Device:
             if len(data.keys()) == 0:
                 return
 
-            print(data)
-            air_quality = 0
+            #print(data)
+            #nowcast = 0
+            max_nowcast = 0
             for key in data:
                 daqi_level = self.aq_loookup.get_daqi_level(key, data[key])
-                offset = self._daqi_order.index(key) * 4
-                air_quality += (daqi_level << offset)
-                print(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {air_quality}, bits: {bin(air_quality)}')
-
-            self.air_quality = air_quality
+                max_nowcast = max(max_nowcast, daqi_level)
+                #offset = self._daqi_order.index(key) * 4
+                #nowcast += (daqi_level << offset)
+                #print(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {nowcast}, bits: {bin(nowcast)}')
+            
+            self.nowcast = max_nowcast
+            #self.nowcast = nowcast
 
     def process_aq_data(self, data):
         processed_data = {}
@@ -121,7 +125,11 @@ class Device:
                 processed_data[result['species']] = result['nowcast_value']
 
         return processed_data
-
+    
+    def get_air_quality(self):
+        air_quality = self.nowcast
+        air_quality += (self.futurecast << 4)
+        return air_quality
 
 class Application:
     def __init__(self, app_id, api_key):
@@ -176,7 +184,7 @@ class Application:
         for key in self.devices:
             device = self.devices[key]
             # if device.do_send_downlink:
-            payload = base64.b64encode(device.air_quality.to_bytes(length=2, byteorder='little'))
+            payload = base64.b64encode(device.get_air_quality().to_bytes(length=1, byteorder='little'))
             msg = '{"downlinks": [{"f_port": 15,"frm_payload": "' + payload.decode() + '","priority": "NORMAL"}]}'
             topic = f'v3/{self.app_id}@ttn/devices/{device.dev_id}/down/replace'
             try:
@@ -195,7 +203,7 @@ class Application:
     def set_air_qualities(self):
         for key in self.devices:
             device = self.devices[key]
-            device.set_air_quality()
+            device.set_nowcast()
 
 
 def on_connect(client, userdata, flags, rc):
@@ -245,8 +253,8 @@ if __name__ == '__main__':
     applications = {}
     for application in TTN_APPLICATIONS:
         for application_id in application:
-            application = Application(application_id, application[application_id])
-            applications[application_id] = application
+            app = Application(application_id, application[application_id])
+            applications[application_id] = app
 
     schedule.every().hour.at(':00').do(check_devices)
     schedule.every().hour.at(':30').do(set_air_qualities)

@@ -1,3 +1,5 @@
+import sys
+import os
 import argparse
 import base64
 import socket
@@ -9,14 +11,43 @@ import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 from paho.mqtt import MQTTException
 from requests.exceptions import SSLError
+import logging
 
 #TODO: some choices that we need to make at some point will determine our options for dealing with applications adn api keys
-TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'}]
+TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'},
+                    {'aware-poc': 'NNSXS.D5GHD6SO44VPDOLNV2QYAENOCIFLWVB4C6NP4VQ.NSMH63X3P55JWUD6NF3MGTQ6KAQ5CMO4MFSA246WZHTS7ZNA6HFA'}]
 TTN_MQTT_HOST = 'eu1.cloud.thethings.network'
 TTN_MQTT_PORT = 1883
 
 # DOWNLINK_SEND = 0
 # DOWNLINK_RECEIVED = 1
+
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+# logger
+logger = logging.getLogger('awair_server')
+logger.setLevel(logging.DEBUG)
+
+# console handler
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# file handler
+fn = os.path.join(BASE_PATH, 'awair_server.log')
+fh = logging.FileHandler(fn)
+fh.setLevel(logging.DEBUG)
+
+# formatter
+formatter_fh = logging.Formatter('[%(asctime)s | %(name)s | %(levelname)s]: %(message)s')
+formatter_ch = logging.Formatter('[%(asctime)s | %(name)s | %(levelname)s]: %(message)s')
+
+# add formatter
+ch.setFormatter(formatter_ch)
+fh.setFormatter(formatter_fh)
+
+# add handlers
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 class AirQualityLookUp:
@@ -80,40 +111,46 @@ class Device:
             timestamp = datetime.datetime.utcnow()
             timestamp = timestamp - datetime.timedelta(hours=1)
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
-            print(timestamp)
+            #print(timestamp)
             url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'
-
+            
+            logger.debug("attempt request from air quality API")
             try:
                 response = requests.get(url)
+                logger.debug(f'received response: {response}')
+                logger.debug(f'received data: {json.dumps(response.json(), indent=4)}')
             except ConnectionError as err:
-                print(f'could not connect to air quality api, got error: {err}')
+                logger.error(f'could not connect to air quality api, got error: {err}')
                 return
             except SSLError as err:
-                print(f'ssl error on air quality api: {err}')
+                logger.error(f'ssl error on air quality api: {err}')
                 return
 
-            # print(json.dumps(response.json(), indent=4))
+            logger.debug(f'API RESPONSE : {json.dumps(response.json(), indent=4)}')
+            #print(json.dumps(response.json(), indent=4))
             data = self.process_aq_data(response.json())
+            logger.debug(f'data: {data}')
             if len(data.keys()) == 0:
                 return
 
-            print(data)
+            #print(data)
             air_quality = 0
             for key in data:
                 daqi_level = self.aq_loookup.get_daqi_level(key, data[key])
                 offset = self._daqi_order.index(key) * 4
                 air_quality += (daqi_level << offset)
-                print(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {air_quality}, bits: {bin(air_quality)}')
+                logger.info(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {air_quality}, bits: {bin(air_quality)}')
 
             self.air_quality = air_quality
 
     def process_aq_data(self, data):
         processed_data = {}
         
+        results = {}
         try:
             results = data['results']
         except KeyError as err: 
-            print(f'key error on air quality return: {err}')
+            logger.error(f'key error on air quality return: {err}')
             return processed_data
 
         for result in results:
@@ -130,6 +167,7 @@ class Application:
         self.mqttc = mqtt.Client()
         self.mqttc.on_connect = on_connect
         self.mqttc.on_message = on_message
+        self.mqttc.on_disconnect = on_disconnect
         self.mqttc.username_pw_set(username=f'{self.app_id}@ttn', password=self.api_key)
         self.mqttc.connect(TTN_MQTT_HOST, TTN_MQTT_PORT, 60)
         # starting like this gives us a thread and handles reconnecting when connection is lost
@@ -150,12 +188,16 @@ class Application:
         response = None
         try:
             response = requests.get(url, headers=headers)
-        except ConnectionError as err:
-            print(f'could not connect to api, got error: {err}')
+        except requests.exceptions.RequestException as err:
+            logger.error(f'could not connect to api, received error: {err}')
             return
-        except SSLError as err:
-            print(f'ssl error: {err}')
-            return
+        #except requests.ConnectionError as err:
+        #    logger.error(f'could not connect to api, got error: {err}')
+        #    return
+        #except SSLError as err:
+        #    logger.error(f'ssl error: {err}')
+        #    return
+        
 
         if response.status_code == 200:
             data = response.json()
@@ -164,13 +206,13 @@ class Application:
                     location = Location(device_data['locations']['user']['longitude'],
                                         device_data['locations']['user']['latitude'])
                 except KeyError:
-                    print(f"device with id: {device_data['ids']['device_id']} did not supply any location data")
+                    logger.error(f"device with id: {device_data['ids']['device_id']} did not supply any location data")
                     location = None
                 device = Device(device_data['ids']['dev_eui'], device_data['ids']['device_id'], location, self.aq_lookup)
                 if device.dev_id not in self.devices or \
                         (self.devices[device.dev_id].location is None and device.location is not None):
                     self.devices[device.dev_id] = device
-                    print(device)
+                    logger.info(f'device: {device}')
 
     def send_downlinks(self):
         for key in self.devices:
@@ -184,24 +226,33 @@ class Application:
                                auth={'username': f'{self.app_id}@ttn',
                                      'password': self.api_key})
             except socket.timeout as err:
-                print(f'socket timed out withh err: {err}, downlink not scheduled')
+                logger.error(f'socket timed out withh err: {err}, downlink not scheduled')
             except ConnectionRefusedError as err:
-                print(f'connection was refused when publishing a downlink on device: {device.dev_id} with error: {err}')
+                logger.error(f'connection was refused when publishing a downlink on device: {device.dev_id} with error: {err}')
             except socket.gaierror as err:
-                print(f'could not publish downlink due to the following error: {err}')
+                logger.error(f'could not publish downlink due to the following error: {err}')
             except MQTTException as err:
-                print(f'publish failed with mqtt error: {err}')
+                logger.error(f'publish failed with mqtt error: {err}')
 
     def set_air_qualities(self):
         for key in self.devices:
+            logger.debug(f'setting air quality for device: {key}')
             device = self.devices[key]
             device.set_air_quality()
 
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    logger.info("Connected with result code " + str(rc))
 
     client.subscribe("#")
+
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        logger.debug(f'unexpected disconnect of mqtt client with code: {rc}')
+    else:
+        logger.debug(f'expected disconnect of mqtt client with code: {rc}')
+    
+    client.connect(TTN_MQTT_HOST, TTN_MQTT_PORT, 60)
 
 
 def on_message(client, userdata, msg):
@@ -212,12 +263,14 @@ def on_message(client, userdata, msg):
     # print(topic_parts)
 
     if msg_type == 'up':
-        print('received uplink')
-
-        # payload = json.loads(msg.payload.decode('utf-8'))['uplink_message']['frm_payload']
+        #logger.('received uplink')
+    
+        
+        payload = json.loads(msg.payload.decode('utf-8'))
+        logger.debug(f'incoming message payload: {payload}')
         # payload = int.from_bytes(base64.b64decode(payload), 'big')
 
-        print(f'received uplink from device: {dev_id}')
+        logger.info(f'received uplink from device: {dev_id}')
         # print(payload)
         # if dev_id in applications[app_id].devices:
         #     if payload == DOWNLINK_SEND:
@@ -237,6 +290,7 @@ def send_downlinks():
 
 
 def set_air_qualities():
+    logger.debug('running set air qualities')
     for key in applications:
         applications[key].set_air_qualities()
 

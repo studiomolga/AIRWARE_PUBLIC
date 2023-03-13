@@ -14,8 +14,9 @@ from requests.exceptions import SSLError
 import logging
 
 #TODO: some choices that we need to make at some point will determine our options for dealing with applications adn api keys
-TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'},
-                    {'aware-poc': 'NNSXS.D5GHD6SO44VPDOLNV2QYAENOCIFLWVB4C6NP4VQ.NSMH63X3P55JWUD6NF3MGTQ6KAQ5CMO4MFSA246WZHTS7ZNA6HFA'}]
+TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'}]
+#TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'},
+#                    {'aware-poc': 'NNSXS.D5GHD6SO44VPDOLNV2QYAENOCIFLWVB4C6NP4VQ.NSMH63X3P55JWUD6NF3MGTQ6KAQ5CMO4MFSA246WZHTS7ZNA6HFA'}]
 TTN_MQTT_HOST = 'eu1.cloud.thethings.network'
 TTN_MQTT_PORT = 1883
 
@@ -117,7 +118,7 @@ class Device:
             
             logger.debug("attempt request from air quality API")
             try:
-                response = requests.get(url)
+                response = requests.get(url, timeout=3.0)
                 logger.debug(f'received response: {response}')
                 logger.debug(f'received data: {json.dumps(response.json(), indent=4)}')
             except ConnectionError as err:

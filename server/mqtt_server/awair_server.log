@@ -4149,3 +4149,13 @@
     "lng": -0.12244280978178
 }
 [2023-03-12 18:30:00,661 | awair_server | DEBUG]: data: {}
+[2023-03-15 22:18:14,195 | awair_server | INFO]: Connected with result code 0
+[2023-03-15 22:18:14,312 | awair_server | INFO]: device: device eui: 70B3D57ED0054BD1, device id: eui-70b3d57ed0054bd1, location: latitude: 51.5669669465223, longitude: -0.12244280978178
+[2023-03-15 22:18:14,312 | awair_server | INFO]: device: device eui: 70B3D57ED0054F79, device id: eui-70b3d57ed0054f79, location: latitude: 51.497961, longitude: -0.176515
+[2023-03-15 22:18:14,313 | awair_server | INFO]: device: device eui: 70B3D57ED005A4EF, device id: eui-70b3d57ed005a4ef, location: latitude: 51.5669669465223, longitude: -0.12244280978178
+[2023-03-15 22:18:14,313 | awair_server | DEBUG]: setting air quality for device: eui-70b3d57ed0054bd1
+[2023-03-15 22:18:14,313 | awair_server | DEBUG]: attempt request from air quality API
+[2023-03-15 22:19:41,580 | awair_server | INFO]: Connected with result code 0
+[2023-03-15 22:19:41,683 | awair_server | INFO]: device: device eui: 70B3D57ED0054BD1, device id: eui-70b3d57ed0054bd1, location: latitude: 51.5669669465223, longitude: -0.12244280978178
+[2023-03-15 22:19:41,684 | awair_server | DEBUG]: setting air quality for device: eui-70b3d57ed0054bd1
+[2023-03-15 22:19:41,684 | awair_server | DEBUG]: attempt request from air quality API

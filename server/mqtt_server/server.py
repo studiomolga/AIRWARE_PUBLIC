@@ -115,22 +115,30 @@ class Device:
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
             #print(timestamp)
             url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'
-            
+           
+            jsonData = {}
             logger.debug("attempt request from air quality API")
             try:
-                response = requests.get(url, timeout=3.0)
+                response = requests.get(url, timeout=20.0)
+                jsonData = response.json()
                 logger.debug(f'received response: {response}')
                 logger.debug(f'received data: {json.dumps(response.json(), indent=4)}')
-            except ConnectionError as err:
-                logger.error(f'could not connect to air quality api, got error: {err}')
+            except requests.exceptions.HTTPError as errh:
+                logger.error("Http Error:",errh)
                 return
-            except SSLError as err:
-                logger.error(f'ssl error on air quality api: {err}')
+            except requests.exceptions.ConnectionError as errc:
+                logger.error("Error Connecting:",errc)
+                return
+            except requests.exceptions.Timeout as errt:
+                logger.error("Timeout Error:",errt)
+                return
+            except requests.exceptions.RequestException as err:
+                logger.error("OOps: Something Else",err)
                 return
 
-            logger.debug(f'API RESPONSE : {json.dumps(response.json(), indent=4)}')
-            #print(json.dumps(response.json(), indent=4))
-            data = self.process_aq_data(response.json())
+            logger.debug(f'API RESPONSE : {json.dumps(jsonData, indent=4)}')
+            #print(json.dumps(jsonData, indent=4))
+            data = self.process_aq_data(jsonData)
             logger.debug(f'data: {data}')
             if len(data.keys()) == 0:
                 return

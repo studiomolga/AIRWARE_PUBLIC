@@ -35,30 +35,45 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
-#include <Wire.h>
 #include <Adafruit_SleepyDog.h>
 #include <Arduino.h>
+#include "RTClib.h"
+#include <Servo.h>
+#include "statemachine.h"
 
+#define LED_NOW_A 5
+#define LED_NOW_B 9
+#define LED_NOW_C 10
+#define LED_NOW_D 12
+#define LED_NOW_E 13
+#define LED_NOW_AMT 13
+
+#define LED_FUTURE_A 14
+#define LED_FUTURE_B 15
+#define LED_FUTURE_C 16
+#define LED_FUTURE_AMT 4
+
+#define SERVO_PIN 11
+#define SERVO_ADJUST_PERIOD 20
+
+#define PIN_CONFIG 0
+#define PIN_STATE 1
 #define VBATPIN A4
-#define BUFFER_SIZE 2
-#define SLEEPING_PIN 12
+#define BUFFER_SIZE 1
 #define MAX_TRIES 3
+#define NUM_PARTS 4
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
 // the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
 // 0x70.
 
-//static const u1_t PROGMEM APPEUI[8]= { 0x61, 0x67, 0xDD, 0x23, 0x55, 0x46, 0xE3, 0xFE };
-//static const u1_t PROGMEM APPEUI[8]= { 0xDD, 0x93, 0x88, 0x57, 0x9A, 0x8D, 0x01, 0xDC };
 static const u1_t PROGMEM APPEUI[8] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 void os_getArtEui (u1_t* buf) {
   memcpy_P(buf, APPEUI, 8);
 }
 
 // This should also be in little endian format, see above.
-//static const u1_t PROGMEM DEVEUI[8]= { 0x9C, 0x46, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
-//static const u1_t PROGMEM DEVEUI[8]= { 0x13, 0xB6, 0x11, 0x00, 0x00, 0xB6, 0x76, 0x98 };
 static const u1_t PROGMEM DEVEUI[8] = { 0xD1, 0x4B, 0x05, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
 void os_getDevEui (u1_t* buf) {
   memcpy_P(buf, DEVEUI, 8);
@@ -67,27 +82,69 @@ void os_getDevEui (u1_t* buf) {
 // This key should be in big endian format (or, since it is not really a
 // number but a block of memory, endianness does not really apply). In
 // practice, a key taken from the TTN console can be copied as-is.
-//static const u1_t PROGMEM APPKEY[16] = { 0x3A, 0xA3, 0xDA, 0x7C, 0x0D, 0xAD, 0x4D, 0x75, 0x83, 0x3D, 0x32, 0x47, 0xAA, 0xA0, 0x51, 0x33 };
-//static const u1_t PROGMEM APPKEY[16] = { 0x18, 0xED, 0xF3, 0x55, 0x98, 0x11, 0xD9, 0x5D, 0xE1, 0x30, 0xF1, 0x4A, 0x96, 0xAF, 0x32, 0xB7 };
 static const u1_t PROGMEM APPKEY[16] = { 0xFE, 0xA7, 0xB1, 0xA7, 0x50, 0x96, 0x15, 0x0E, 0xB9, 0xCB, 0x0F, 0x0E, 0x54, 0x47, 0xBC, 0xC1 };
 void os_getDevKey (u1_t* buf) {
   memcpy_P(buf, APPKEY, 16);
 }
 
-//static uint8_t dataOff[] = { 1 };
+// config and state matrix for the nowcast leds
+uint8_t nowcastLEDMatrix[LED_NOW_AMT][2][5] = {
+  //           PIN_CONFIG                  PIN_STATE
+  //    A       B       C      D      E         A     B    C    D    E
+  { { OUTPUT, OUTPUT, INPUT, INPUT, INPUT }, { HIGH, LOW, LOW, LOW, LOW } },  //  1
+  { { OUTPUT, OUTPUT, INPUT, INPUT, INPUT }, { LOW, HIGH, LOW, LOW, LOW  } }, //  2
+  { { INPUT, OUTPUT, OUTPUT, INPUT, INPUT }, { LOW, HIGH, LOW, LOW, LOW  } }, //  3
+  { { INPUT, OUTPUT, OUTPUT, INPUT, INPUT }, { LOW, LOW, HIGH, LOW, LOW  } }, //  4
+  { { INPUT, INPUT, OUTPUT, OUTPUT, INPUT }, { LOW, LOW, HIGH, LOW, LOW  } }, //  5
+  { { INPUT, INPUT, OUTPUT, OUTPUT, INPUT }, { LOW, LOW, LOW, HIGH, LOW  } }, //  6
+  { { INPUT, INPUT, INPUT, OUTPUT, OUTPUT }, { LOW, LOW, LOW, HIGH, LOW  } }, //  7
+  { { INPUT, INPUT, INPUT, OUTPUT, OUTPUT }, { LOW, LOW, LOW, LOW, HIGH  } }, //  8
+  { { OUTPUT, INPUT, OUTPUT, INPUT, INPUT }, { HIGH, LOW, LOW, LOW, LOW  } }, //  9
+  { { OUTPUT, INPUT, OUTPUT, INPUT, INPUT }, { LOW, LOW, HIGH, LOW, LOW  } }, // 10
+  { { INPUT, INPUT, OUTPUT, INPUT, OUTPUT }, { LOW, LOW, HIGH, LOW, LOW  } }, // 11
+  { { INPUT, INPUT, OUTPUT, INPUT, OUTPUT }, { LOW, LOW, LOW, LOW, HIGH  } }, // 12
+  { { INPUT, OUTPUT, INPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW, LOW, LOW  } }  // 13
+};
+
+uint8_t futurecastLEDMatrix[LED_FUTURE_AMT][2][3] = {
+  //           PIN_CONFIG                  PIN_STATE
+  //    A       B       C         A     B    C  
+  { { OUTPUT, OUTPUT, INPUT }, { HIGH, LOW, LOW } }, //  1 
+  { { OUTPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW } }, //  2
+  { { INPUT, OUTPUT, OUTPUT }, { LOW, HIGH, LOW } }, //  3
+  { { INPUT, OUTPUT, OUTPUT }, { LOW, LOW, HIGH } }  //  4
+};
+
 static uint8_t data[] = { 0 };    //we just send an ID every minute, this ID is registered in a database with all the things needed for making the api call and sending data back
 static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const uint16_t TX_INTERVAL_SHORT = 200;   //adjust these times to something reasonable, this is for testing
-const uint16_t TX_INTERVAL_LONG = 3600;
+const uint32_t TX_INTERVAL_SHORT = 200;
+const uint32_t TX_INTERVAL_LONG = 3600;
 bool isSleep = false;
 bool hasSend = false;
 bool hasReceived = false;
+bool doServoAdjust = false;
 uint16_t loops = 0;
 byte buf[BUFFER_SIZE];
+
 uint8_t tries = 0;
+uint8_t nowcast = 0;
+uint8_t futurecast = 0;
+uint8_t currNowcast = 0;
+uint8_t currFuturecast = 0;
+uint8_t servoPos = 0;
+uint8_t currServoPos = 0;
+uint32_t lastServoEvent = 0;
+uint32_t txInterval = TX_INTERVAL_SHORT;
+DateTime nextSend;
+
+RTC_DS3231 rtc;
+
+Servo servo;
+
+StateMachine stateMachine;
 
 // Pin mapping
 //
@@ -215,19 +272,22 @@ void onEvent (ev_t ev) {
       break;
     case EV_TXCOMPLETE:
       Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-      hasSend = false;
-      if (LMIC.dataLen == 2) {
+      if (LMIC.dataLen == BUFFER_SIZE) {
         Serial.println(F("Received "));
         Serial.println(LMIC.dataLen);
         Serial.println(F(" bytes of payload"));
-        for (int i = 0; i < LMIC.dataLen; i++) {
-          Serial.println(LMIC.frame[LMIC.dataBeg + i], HEX);
-          buf[i] = LMIC.frame[LMIC.dataBeg + i];
+        nowcast = LMIC.frame[LMIC.dataBeg] & 15;
+        futurecast = (LMIC.frame[LMIC.dataBeg] >> 4) & 15;
+        txInterval = TX_INTERVAL_LONG;
+        stateMachine.setState(RECEIVED);
+      } else {
+        if(tries < MAX_TRIES){
+          txInterval = TX_INTERVAL_SHORT;  
+        } else {
+          txInterval = TX_INTERVAL_LONG;
         }
-        hasSend = true;
-        hasReceived = true;
+        stateMachine.setState(SLEEP);
       }
-      isSleep = true;
       break;
     case EV_LOST_TSYNC:
       Serial.println(F("EV_LOST_TSYNC"));
@@ -297,14 +357,31 @@ void setup() {
   //    while (! Serial)
   //        ;
   Serial.begin(9600);
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+
+  if (rtc.lostPower()) {
+    Serial.println("RTC lost power, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+
   Serial.println(F("Starting"));
 
-  pinMode(SLEEPING_PIN, INPUT);
-  
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake
+  clearNowcastLed();
+  clearFuturecastLed();
 
-  Wire.begin();
+  // setup servo
+  servo.attach(SERVO_PIN);
+  servo.write(1);
+  delay(1000);
+//  digitalWrite(SERVO_ENABLE_PIN, LOW);
+  servo.detach();
 
   // LMIC init
   os_init();
@@ -314,52 +391,150 @@ void setup() {
   LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
   LMIC_setDrTxpow(DR_SF12, 14);
 
-  // Start job (sending automatically starts OTAA too)
+  // Start job (sending automatically starts OTAA too), so start FSM in SEND 
+  stateMachine.addState(SEND, &sendLoop, &sendInit);
+  stateMachine.addState(RECEIVED, &receivedLoop, &receivedInit);
+  stateMachine.addState(SLEEP, &sleepLoop, &sleepInit);
+  stateMachine.setState(SEND);
+}
+
+//--------------------------------------- state inits
+void sendInit() {
+  Serial.println(F("SEND"));
+  loops = 0;
+  tries++;
   do_send(&sendjob);
 }
 
+void receivedInit() {
+  Serial.println(F("RECEIVED"));
+  tries = 0;
+
+  // set leds
+  setNowcastLed(nowcast);
+  setFuturecastLed(futurecast);
+
+  Serial.print(F("nowcast: "));
+  Serial.println(nowcast);
+  
+  Serial.print(F("forcast: "));
+  Serial.println(futurecast);
+
+  // calculate new servo position
+  servoPos = ((178 / LED_NOW_AMT) * nowcast) + 1;
+
+  Serial.print(F("new servo pos to reach: "));
+  Serial.println(servoPos);
+
+  servo.attach(SERVO_PIN);
+  lastServoEvent = millis();
+}
+
+void sleepInit() {
+  Serial.println(F("SLEEP"));
+  Serial.print(F("duration: "));
+  Serial.println(txInterval);
+  nextSend = DateTime(rtc.now() + TimeSpan(txInterval));
+
+  Serial.print(F("next send: "));
+  Serial.print(nextSend.year(), DEC);
+  Serial.print(F("/"));
+  Serial.print(nextSend.month(), DEC);
+  Serial.print(F("/"));
+  Serial.print(nextSend.day(), DEC);
+  Serial.print(F(" "));
+  Serial.print(nextSend.hour(), DEC);
+  Serial.print(F(":"));
+  Serial.print(nextSend.minute(), DEC);
+  Serial.print(F(":"));
+  Serial.println(nextSend.second(), DEC);
+}
+
+//--------------------------------------- state loops
+void sendLoop() {
+  // this does nothing but wait until the onEvent method gets called
+}
+
+void receivedLoop() {
+  uint32_t currMillis = millis();
+  
+  if(servoPos == currServoPos){
+    stateMachine.setState(SLEEP);
+    servo.detach();
+//    digitalWrite(SERVO_ENABLE_PIN, LOW);
+    return;
+  }
+
+  if(servoPos < currServoPos && currMillis - lastServoEvent > SERVO_ADJUST_PERIOD){
+    currServoPos = max(currServoPos - 1, 1);
+    Serial.print("servo position: ");
+    Serial.println(currServoPos);
+    servo.write(currServoPos);
+    lastServoEvent = currMillis;
+  }
+
+  if(servoPos > currServoPos && currMillis - lastServoEvent > SERVO_ADJUST_PERIOD){
+    currServoPos = min(currServoPos + 1, 179);
+    Serial.print("servo position: ");
+    Serial.println(currServoPos);
+    servo.write(currServoPos);
+    lastServoEvent = currMillis;
+  }
+}
+
+void sleepLoop() {
+  loops++;
+  doSleep();
+
+  if (rtc.now() > nextSend) {
+    stateMachine.setState(SEND);
+  }
+}
+
 void loop() {
-  bool shouldSend = false;
-
   os_runloop_once();
-
-  if (hasReceived){
-    Wire.beginTransmission(9);
-    Wire.write(buf, BUFFER_SIZE);
-    Wire.endTransmission();
-    delay(100);
-    hasReceived = false;
-    tries = 0;
-  }
-
-  uint16_t txInterval = TX_INTERVAL_LONG;
-  if (!hasSend && tries < MAX_TRIES) {
-    txInterval = TX_INTERVAL_SHORT;
-  }
-
-  if ((loops * 10) > txInterval && digitalRead(SLEEPING_PIN) == HIGH) {
-    shouldSend = true;
-    Serial.println("time to send");
-  }
-
-  if (shouldSend) {
-    shouldSend = false;
-    isSleep = false;
-    loops = 0;
-    tries++;
-    do_send(&sendjob);
-  }
-
-  if (isSleep) {
-    loops++;
-    doSleep();
-  }
-
+  stateMachine.update();
 }
 
 void doSleep() {
   // sleepydog sleeping
-  digitalWrite(LED_BUILTIN, LOW); // Show we're asleep
+//  digitalWrite(LED_BUILTIN, LOW);
   int sleepMS = Watchdog.sleep(10000);
-  digitalWrite(LED_BUILTIN, HIGH);
+//  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+void setNowcastLed(uint8_t led) {
+  pinMode(LED_NOW_A, nowcastLEDMatrix[led][PIN_CONFIG][0]);
+  pinMode(LED_NOW_B, nowcastLEDMatrix[led][PIN_CONFIG][1]);
+  pinMode(LED_NOW_C, nowcastLEDMatrix[led][PIN_CONFIG][2]);
+  pinMode(LED_NOW_D, nowcastLEDMatrix[led][PIN_CONFIG][3]);
+  pinMode(LED_NOW_E, nowcastLEDMatrix[led][PIN_CONFIG][4]);
+  digitalWrite(LED_NOW_A, nowcastLEDMatrix[led][PIN_STATE][0]);
+  digitalWrite(LED_NOW_B, nowcastLEDMatrix[led][PIN_STATE][1]);
+  digitalWrite(LED_NOW_C, nowcastLEDMatrix[led][PIN_STATE][2]);
+  digitalWrite(LED_NOW_D, nowcastLEDMatrix[led][PIN_STATE][3]);
+  digitalWrite(LED_NOW_E, nowcastLEDMatrix[led][PIN_STATE][4]);
+}
+
+void setFuturecastLed(int led) {
+  pinMode(LED_FUTURE_A, futurecastLEDMatrix[led][PIN_CONFIG][0]);
+  pinMode(LED_FUTURE_B, futurecastLEDMatrix[led][PIN_CONFIG][1]);
+  pinMode(LED_FUTURE_C, futurecastLEDMatrix[led][PIN_CONFIG][2]);
+  digitalWrite( LED_FUTURE_A, futurecastLEDMatrix[led][PIN_STATE][0]);
+  digitalWrite( LED_FUTURE_B, futurecastLEDMatrix[led][PIN_STATE][1]);
+  digitalWrite( LED_FUTURE_C, futurecastLEDMatrix[led][PIN_STATE][2]);
+}
+
+void clearNowcastLed() {
+  pinMode(LED_NOW_A, INPUT);
+  pinMode(LED_NOW_B, INPUT);
+  pinMode(LED_NOW_C, INPUT);
+  pinMode(LED_NOW_D, INPUT);
+  pinMode(LED_NOW_E, INPUT);
+}
+
+void clearFuturecastLed(){
+  pinMode(LED_FUTURE_A, INPUT);
+  pinMode(LED_FUTURE_B, INPUT);
+  pinMode(LED_FUTURE_C, INPUT);
 }

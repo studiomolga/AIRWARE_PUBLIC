@@ -39,6 +39,7 @@
 #include <Arduino.h>
 #include "RTClib.h"
 #include <Servo.h>
+#include "statemachine.h"
 
 #define LED_NOW_A 5
 #define LED_NOW_B 9
@@ -52,9 +53,8 @@
 #define LED_FUTURE_C 16
 #define LED_FUTURE_AMT 4
 
-#define SERVO_ENABLE_PIN 17
 #define SERVO_PIN 11
-#define SERVO_ADJUST_PERIOD 5
+#define SERVO_ADJUST_PERIOD 20
 
 #define PIN_CONFIG 0
 #define PIN_STATE 1
@@ -120,11 +120,12 @@ static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const uint16_t TX_INTERVAL_SHORT = 200;   //adjust these times to something reasonable, this is for testing
-const uint16_t TX_INTERVAL_LONG = 3600;
+const uint32_t TX_INTERVAL_SHORT = 200;
+const uint32_t TX_INTERVAL_LONG = 3600;
 bool isSleep = false;
 bool hasSend = false;
 bool hasReceived = false;
+bool doServoAdjust = false;
 uint16_t loops = 0;
 byte buf[BUFFER_SIZE];
 
@@ -136,10 +137,14 @@ uint8_t currFuturecast = 0;
 uint8_t servoPos = 0;
 uint8_t currServoPos = 0;
 uint32_t lastServoEvent = 0;
+uint32_t txInterval = TX_INTERVAL_SHORT;
+DateTime nextSend;
 
 RTC_DS3231 rtc;
 
 Servo servo;
+
+StateMachine stateMachine;
 
 // Pin mapping
 //
@@ -267,18 +272,22 @@ void onEvent (ev_t ev) {
       break;
     case EV_TXCOMPLETE:
       Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-      hasSend = false;
       if (LMIC.dataLen == BUFFER_SIZE) {
         Serial.println(F("Received "));
         Serial.println(LMIC.dataLen);
         Serial.println(F(" bytes of payload"));
         nowcast = LMIC.frame[LMIC.dataBeg] & 15;
         futurecast = (LMIC.frame[LMIC.dataBeg] >> 4) & 15;
-
-        hasSend = true;
-        hasReceived = true;
+        txInterval = TX_INTERVAL_LONG;
+        stateMachine.setState(RECEIVED);
+      } else {
+        if(tries < MAX_TRIES){
+          txInterval = TX_INTERVAL_SHORT;  
+        } else {
+          txInterval = TX_INTERVAL_LONG;
+        }
+        stateMachine.setState(SLEEP);
       }
-//      isSleep = true;
       break;
     case EV_LOST_TSYNC:
       Serial.println(F("EV_LOST_TSYNC"));
@@ -368,15 +377,11 @@ void setup() {
   clearFuturecastLed();
 
   // setup servo
-  pinMode(SERVO_ENABLE_PIN, OUTPUT);
-  digitalWrite(SERVO_ENABLE_PIN, HIGH);
   servo.attach(SERVO_PIN);
   servo.write(1);
-  delay(500);
-  digitalWrite(SERVO_ENABLE_PIN, LOW);
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); // Show we're awake
+  delay(1000);
+//  digitalWrite(SERVO_ENABLE_PIN, LOW);
+  servo.detach();
 
   // LMIC init
   os_init();
@@ -386,37 +391,83 @@ void setup() {
   LMIC.dn2Dr = DR_SF9;        // TTN uses SF9 for its RX2 window.
   LMIC_setDrTxpow(DR_SF12, 14);
 
-  // Start job (sending automatically starts OTAA too)
+  // Start job (sending automatically starts OTAA too), so start FSM in SEND 
+  stateMachine.addState(SEND, &sendLoop, &sendInit);
+  stateMachine.addState(RECEIVED, &receivedLoop, &receivedInit);
+  stateMachine.addState(SLEEP, &sleepLoop, &sleepInit);
+  stateMachine.setState(SEND);
+}
+
+//--------------------------------------- state inits
+void sendInit() {
+  Serial.println(F("SEND"));
+  loops = 0;
+  tries++;
   do_send(&sendjob);
 }
 
-void loop() {
-  bool shouldSend = false;
+void receivedInit() {
+  Serial.println(F("RECEIVED"));
+  tries = 0;
+
+  // set leds
+  setNowcastLed(nowcast);
+  setFuturecastLed(futurecast);
+
+  Serial.print(F("nowcast: "));
+  Serial.println(nowcast);
+  
+  Serial.print(F("forcast: "));
+  Serial.println(futurecast);
+
+  // calculate new servo position
+  servoPos = ((178 / LED_NOW_AMT) * nowcast) + 1;
+
+  Serial.print(F("new servo pos to reach: "));
+  Serial.println(servoPos);
+
+  servo.attach(SERVO_PIN);
+  lastServoEvent = millis();
+}
+
+void sleepInit() {
+  Serial.println(F("SLEEP"));
+  Serial.print(F("duration: "));
+  Serial.println(txInterval);
+  nextSend = DateTime(rtc.now() + TimeSpan(txInterval));
+
+  Serial.print(F("next send: "));
+  Serial.print(nextSend.year(), DEC);
+  Serial.print(F("/"));
+  Serial.print(nextSend.month(), DEC);
+  Serial.print(F("/"));
+  Serial.print(nextSend.day(), DEC);
+  Serial.print(F(" "));
+  Serial.print(nextSend.hour(), DEC);
+  Serial.print(F(":"));
+  Serial.print(nextSend.minute(), DEC);
+  Serial.print(F(":"));
+  Serial.println(nextSend.second(), DEC);
+}
+
+//--------------------------------------- state loops
+void sendLoop() {
+  // this does nothing but wait until the onEvent method gets called
+}
+
+void receivedLoop() {
   uint32_t currMillis = millis();
-
-  os_runloop_once();
-
-  if (hasReceived) {
-    // set the nowcast leds
-    setNowcastLed(nowcast);
-
-    // check whether we need to set the servo to a new position
-    if (currNowcast != nowcast) {
-      
-      // calculate new servo position
-      servoPos = ((178 / LED_NOW_AMT) * nowcast) + 1;
-      digitalWrite(SERVO_ENABLE_PIN, HIGH);
-      
-      currNowcast = nowcast;
-    }
-
-    setFuturecastLed(futurecast);
-
-    tries = 0;
+  
+  if(servoPos == currServoPos){
+    stateMachine.setState(SLEEP);
+    servo.detach();
+//    digitalWrite(SERVO_ENABLE_PIN, LOW);
+    return;
   }
 
   if(servoPos < currServoPos && currMillis - lastServoEvent > SERVO_ADJUST_PERIOD){
     currServoPos = max(currServoPos - 1, 1);
+    Serial.print("servo position: ");
     Serial.println(currServoPos);
     servo.write(currServoPos);
     lastServoEvent = currMillis;
@@ -424,54 +475,35 @@ void loop() {
 
   if(servoPos > currServoPos && currMillis - lastServoEvent > SERVO_ADJUST_PERIOD){
     currServoPos = min(currServoPos + 1, 179);
+    Serial.print("servo position: ");
     Serial.println(currServoPos);
     servo.write(currServoPos);
     lastServoEvent = currMillis;
   }
+}
 
-  if(servoPos == currServoPos && hasReceived){
-    Serial.println("disable servo");
-    digitalWrite(SERVO_ENABLE_PIN, LOW);
-    isSleep = true;
-    hasReceived = false;
+void sleepLoop() {
+  loops++;
+  doSleep();
+
+  if (rtc.now() > nextSend) {
+    stateMachine.setState(SEND);
   }
+}
 
-  uint16_t txInterval = TX_INTERVAL_LONG;
-  if (!hasSend && tries < MAX_TRIES) {
-    txInterval = TX_INTERVAL_SHORT;
-  }
-
-  if ((loops * 10) > txInterval) {
-    shouldSend = true;
-    Serial.println("time to send");
-  }
-
-  if (shouldSend) {
-    shouldSend = false;
-    isSleep = false;
-    loops = 0;
-    tries++;
-    do_send(&sendjob);
-  }
-
-  if (isSleep) {
-//    Serial.println("sleep");
-    loops++;
-    doSleep();
-  }
-
+void loop() {
+  os_runloop_once();
+  stateMachine.update();
 }
 
 void doSleep() {
   // sleepydog sleeping
-  digitalWrite(LED_BUILTIN, LOW);
+//  digitalWrite(LED_BUILTIN, LOW);
   int sleepMS = Watchdog.sleep(10000);
-  digitalWrite(LED_BUILTIN, HIGH);
+//  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void setNowcastLed(uint8_t led) {
-  Serial.print("setting nowcast: ");
-  Serial.println(led);
   pinMode(LED_NOW_A, nowcastLEDMatrix[led][PIN_CONFIG][0]);
   pinMode(LED_NOW_B, nowcastLEDMatrix[led][PIN_CONFIG][1]);
   pinMode(LED_NOW_C, nowcastLEDMatrix[led][PIN_CONFIG][2]);

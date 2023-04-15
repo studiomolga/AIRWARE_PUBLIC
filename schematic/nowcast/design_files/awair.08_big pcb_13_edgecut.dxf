@@ -39,15 +39,15 @@ $EXTMAX
   9
 $LIMMIN
  10
--259.9999048794554
+-6212.697901237703
  20
--259.2296279363238
+-6000
   9
 $LIMMAX
  10
-20272.29873509528
+36000
  20
-16265.89275178644
+27000
   9
 $ORTHOMODE
  70
@@ -921,9 +921,9 @@ AcDbViewportTableRecord
  21
 1
  12
-222.0844399596402
+748.2060814252376
  22
-139.9358588521202
+467.6288008907735
  13
 0
  23
@@ -949,7 +949,7 @@ AcDbViewportTableRecord
  37
 0
  40
-883.8054243291804
+1801.236862690387
  41
 1.985897435897436
  42
@@ -2287,6 +2287,66 @@ AcDbSymbolTableRecord
 100
 AcDbBlockTableRecord
   2
+Znacznik O 24
+  0
+BLOCK_RECORD
+  5
+51
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+Znacznik O 24_2
+  0
+BLOCK_RECORD
+  5
+54
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+Znacznik O 24_3
+  0
+BLOCK_RECORD
+  5
+57
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+Znacznik O 24_4
+  0
+BLOCK_RECORD
+  5
+5A
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+Znacznik O 24_5
+  0
+BLOCK_RECORD
+  5
+5D
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+Płaszczyzna odcinająca_1
+  0
+BLOCK_RECORD
+  5
+60
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
 Bez nazwy_STORY_MARKER
   0
 ENDTAB
@@ -2375,6 +2435,198 @@ AcDbEntity
 100
 AcDbBlockBegin
   2
+Znacznik O 24
+ 70
+    0
+ 10
+0
+ 20
+0
+  3
+Znacznik O 24
+  1
+
+  0
+ENDBLK
+  5
+50
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+52
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+Znacznik O 24_2
+ 70
+    0
+ 10
+0
+ 20
+0
+  3
+Znacznik O 24_2
+  1
+
+  0
+ENDBLK
+  5
+53
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+55
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+Znacznik O 24_3
+ 70
+    0
+ 10
+0
+ 20
+0
+  3
+Znacznik O 24_3
+  1
+
+  0
+ENDBLK
+  5
+56
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+58
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+Znacznik O 24_4
+ 70
+    0
+ 10
+0
+ 20
+0
+  3
+Znacznik O 24_4
+  1
+
+  0
+ENDBLK
+  5
+59
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+5B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+Znacznik O 24_5
+ 70
+    0
+ 10
+0
+ 20
+0
+  3
+Znacznik O 24_5
+  1
+
+  0
+ENDBLK
+  5
+5C
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+5E
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+Płaszczyzna odcinająca_1
+ 70
+    0
+ 10
+907.0230029343236
+ 20
+278.3129791789553
+  3
+Płaszczyzna odcinająca_1
+  1
+
+  0
+ENDBLK
+  5
+5F
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+61
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
 Bez nazwy_STORY_MARKER
  70
     0
@@ -2389,7 +2641,7 @@ Bez nazwy_STORY_MARKER
   0
 ENDBLK
   5
-50
+62
 100
 AcDbEntity
   8
@@ -2405,7 +2657,7 @@ ENTITIES
   0
 LWPOLYLINE
   5
-51
+63
 100
 AcDbEntity
   8

@@ -4,7 +4,7 @@
     (thickness 1.6)
   )
 
-  (paper "A4")
+  (paper "User" 1200 1200)
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)
@@ -84,7 +84,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 0cb2a093-4c6c-472f-85e0-744aeb49a35d)
-    (at 196.85 66.04)
+    (at 410 415.175)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -140,7 +140,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 0f4893aa-a582-4a40-83b9-8a22bcf40ea7)
-    (at 176.53 60.96)
+    (at 383.25 465.925)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -196,7 +196,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 1420eaab-62f4-423e-a2de-2d4f69164239)
-    (at 245.11 105.41)
+    (at 611.1 339.125)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -252,7 +252,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 1740f3f1-d245-4ae6-be9c-46e913935515)
-    (at 90.05 49.53)
+    (at 409.85 687.275)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -308,7 +308,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 1d9787a2-c723-4cce-a51f-566ae9e77f7d)
-    (at 156.09 55.88)
+    (at 369.275 521.825)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -364,7 +364,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 2d85cddc-c561-4a39-a713-3894ef38dae2)
-    (at 54.49 57.15)
+    (at 550.6 783.825)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -373,7 +373,7 @@
     (property "ki_keywords" "LED diode")
     (path "/8698f522-4c2e-4a78-ab45-eb6fcefe6e80")
     (attr through_hole)
-    (fp_text reference "D2" (at 1.27 -3.96) (layer "F.SilkS")
+    (fp_text reference "D1" (at 1.27 -3.96) (layer "F.SilkS")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp e04821fa-945f-46df-a879-63e7dd1598f5)
     )
@@ -420,7 +420,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 422a826c-e6c2-444c-9ff0-e70e5e5d16f9)
-    (at 259.08 148.59)
+    (at 496.3 338.475)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -476,7 +476,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 4b219960-bd06-459d-9595-93d73f1f24f4)
-    (at 111.64 49.53)
+    (at 382.8 636.325)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -532,7 +532,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 722c56b9-cf8f-4e85-9600-22f0f6bd3cbe)
-    (at 71 50.8)
+    (at 448.625 730.55)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -588,7 +588,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 8bc0a672-a3d4-431d-a667-3243f855ace2)
-    (at 134.5 52.07)
+    (at 369.725 579.525)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -644,7 +644,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp 98d507ab-d6f0-4893-841b-d125a4b0f592)
-    (at 210.82 74.93)
+    (at 448.775 371)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -698,65 +698,9 @@
     )
   )
 
-  (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
-    (tstamp ab30b989-96ef-4658-b9d1-d415a9072084)
-    (at 226.06 88.9)
-    (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
-    (tags "LED diameter 5.0mm 2 pins")
-    (property "Sheetfile" "nowcast.kicad_sch")
-    (property "Sheetname" "")
-    (property "ki_description" "Light emitting diode")
-    (property "ki_keywords" "LED diode")
-    (path "/9942fe69-99b3-4b31-ae12-f1fc755cbce8")
-    (attr through_hole)
-    (fp_text reference "D14" (at 1.27 -3.96) (layer "F.SilkS")
-        (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp 43999ddb-15e5-4fc7-a043-bcfdedb45fcb)
-    )
-    (fp_text value "LED" (at 1.27 3.96) (layer "F.Fab")
-        (effects (font (size 1 1) (thickness 0.15)))
-      (tstamp f231b627-b240-40fa-bfff-5d0bf5792a3e)
-    )
-    (fp_text user "${REFERENCE}" (at 1.25 0) (layer "F.Fab")
-        (effects (font (size 0.8 0.8) (thickness 0.2)))
-      (tstamp 9c478621-4e26-4e09-beda-101dfa89f15a)
-    )
-    (fp_line (start -1.29 -1.545) (end -1.29 1.545)
-      (stroke (width 0.12) (type solid)) (layer "F.SilkS") (tstamp 322a9c14-825d-4b04-8714-17fb14fa58a3))
-    (fp_arc (start -1.29 -1.54483) (mid 2.072002 -2.880433) (end 4.26 0.000462)
-      (stroke (width 0.12) (type solid)) (layer "F.SilkS") (tstamp af763d6b-7e95-429e-a760-2b2cb95df211))
-    (fp_arc (start 4.26 -0.000462) (mid 2.072002 2.880433) (end -1.29 1.54483)
-      (stroke (width 0.12) (type solid)) (layer "F.SilkS") (tstamp 9c6b35ed-e0b4-4545-888a-f6fc765c38d8))
-    (fp_circle (center 1.27 0) (end 3.77 0)
-      (stroke (width 0.12) (type solid)) (fill none) (layer "F.SilkS") (tstamp c6a0ac0e-cf92-4f3f-bf66-0de668c4214f))
-    (fp_line (start -1.95 -3.25) (end -1.95 3.25)
-      (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (tstamp f30163a6-846a-4fdf-9071-9ce17dc9d515))
-    (fp_line (start -1.95 3.25) (end 4.5 3.25)
-      (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (tstamp 77340934-143f-4ac3-9520-302a6caa1d21))
-    (fp_line (start 4.5 -3.25) (end -1.95 -3.25)
-      (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (tstamp 69c67b2f-f556-4d51-8583-e07e51995b3b))
-    (fp_line (start 4.5 3.25) (end 4.5 -3.25)
-      (stroke (width 0.05) (type solid)) (layer "F.CrtYd") (tstamp f549e576-acfe-4dba-871f-1d502c7d25cf))
-    (fp_line (start -1.23 -1.469694) (end -1.23 1.469694)
-      (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 6c2678d0-b4d5-4712-a4ac-a43db8178703))
-    (fp_arc (start -1.23 -1.469694) (mid 4.17 0.000016) (end -1.230016 1.469666)
-      (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 22de9336-b60d-480e-80de-83246e4fad97))
-    (fp_circle (center 1.27 0) (end 3.77 0)
-      (stroke (width 0.1) (type solid)) (fill none) (layer "F.Fab") (tstamp 3bc80f51-f5f2-491b-9bb7-85445845f60a))
-    (pad "1" thru_hole rect (at 0 0) (size 1.8 1.8) (drill 0.9) (layers "*.Cu" "*.Mask")
-      (net 4 "NOWCAST_D") (pinfunction "K") (pintype "passive") (tstamp e8b1133b-74fb-4c07-a04a-31e6c19a2294))
-    (pad "2" thru_hole circle (at 2.54 0) (size 1.8 1.8) (drill 0.9) (layers "*.Cu" "*.Mask")
-      (net 1 "NOWCAST_B") (pinfunction "A") (pintype "passive") (tstamp ba15e0f5-56e6-436a-9f1f-29136571d7b8))
-    (model "${KICAD6_3DMODEL_DIR}/LED_THT.3dshapes/LED_D5.0mm.wrl"
-      (offset (xyz 0 0 0))
-      (scale (xyz 1 1 1))
-      (rotate (xyz 0 0 0))
-    )
-  )
-
   (footprint "Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical" (layer "F.Cu")
     (tstamp af325b89-ea02-4e43-a873-5d5aa8127abf)
-    (at 141.13 119.38)
+    (at 585.675 786.075 -90)
     (descr "JST XH series connector, B5B-XH-A (http://www.jst-mfg.com/product/pdf/eng/eXH.pdf), generated with kicad-footprint-generator")
     (tags "connector JST XH vertical")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -765,15 +709,15 @@
     (property "ki_keywords" "connector")
     (path "/a45916a5-ac49-4422-8762-cf9d6240945c")
     (attr through_hole)
-    (fp_text reference "J1" (at 5 -3.55) (layer "F.SilkS")
+    (fp_text reference "J1" (at 5 -3.55 90) (layer "F.SilkS")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp ee0afd4a-c46c-4fce-baf2-6c4f4684701c)
     )
-    (fp_text value "Conn_01x05_Pin" (at 5 4.6) (layer "F.Fab")
+    (fp_text value "Conn_01x05_Pin" (at 5 4.6 90) (layer "F.Fab")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp bc744e2a-995b-4575-8393-08c0a06439ac)
     )
-    (fp_text user "${REFERENCE}" (at 5 2.7) (layer "F.Fab")
+    (fp_text user "${REFERENCE}" (at 5 2.7 90) (layer "F.Fab")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp ad0e9d69-a810-4662-a964-54a33a7fa637)
     )
@@ -845,15 +789,15 @@
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 3d87bb38-541b-4928-8fcd-21b55a895381))
     (fp_line (start 12.45 3.4) (end 12.45 -2.35)
       (stroke (width 0.1) (type solid)) (layer "F.Fab") (tstamp 8a85ffb6-c39d-4ca8-bc13-14f48b50b675))
-    (pad "1" thru_hole roundrect (at 0 0) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.147059)
+    (pad "1" thru_hole roundrect (at 0 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.147059)
       (net 2 "NOWCAST_A") (pinfunction "Pin_1") (pintype "passive") (tstamp 33c625a6-f06e-4b8e-b92d-6140f607a1ac))
-    (pad "2" thru_hole oval (at 2.5 0) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
+    (pad "2" thru_hole oval (at 2.5 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 1 "NOWCAST_B") (pinfunction "Pin_2") (pintype "passive") (tstamp 181938e8-ba62-4210-862d-a297cc75f6ac))
-    (pad "3" thru_hole oval (at 5 0) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
+    (pad "3" thru_hole oval (at 5 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 3 "NOWCAST_C") (pinfunction "Pin_3") (pintype "passive") (tstamp 710726c1-2bf3-4595-9213-ae4229d133c2))
-    (pad "4" thru_hole oval (at 7.5 0) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
+    (pad "4" thru_hole oval (at 7.5 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 4 "NOWCAST_D") (pinfunction "Pin_4") (pintype "passive") (tstamp d87199f6-c867-43cc-80c8-846ca03c0569))
-    (pad "5" thru_hole oval (at 10 0) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
+    (pad "5" thru_hole oval (at 10 0 270) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 5 "NOWCAST_E") (pinfunction "Pin_5") (pintype "passive") (tstamp 1706264a-d89d-4100-8410-4bc6a967942f))
     (model "${KICAD6_3DMODEL_DIR}/Connector_JST.3dshapes/JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical.wrl"
       (offset (xyz 0 0 0))
@@ -864,7 +808,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp cff1ba46-b1a3-426d-9152-d24ef02405b4)
-    (at 255.27 121.92)
+    (at 549.785 317.675)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -920,7 +864,7 @@
 
   (footprint "LED_THT:LED_D5.0mm" (layer "F.Cu")
     (tstamp d1a5d3c2-835f-438f-8209-7da17a04ccd5)
-    (at 40.52 71.12)
+    (at 496.05 763.45)
     (descr "LED, diameter 5.0mm, 2 pins, http://cdn-reichelt.de/documents/datenblatt/A500/LL-504BC2E-009.pdf")
     (tags "LED diameter 5.0mm 2 pins")
     (property "Sheetfile" "nowcast.kicad_sch")
@@ -929,7 +873,7 @@
     (property "ki_keywords" "LED diode")
     (path "/3de8310a-2f5d-4ac5-9193-70a291faa7e0")
     (attr through_hole)
-    (fp_text reference "D1" (at 1.27 -3.96) (layer "F.SilkS")
+    (fp_text reference "D2" (at 1.27 -3.96) (layer "F.SilkS")
         (effects (font (size 1 1) (thickness 0.15)))
       (tstamp b668a3b5-ddfc-4288-a9c0-10ae4a3e6c82)
     )
@@ -974,4 +918,148 @@
     )
   )
 
+  (gr_line (start 395.6428 497.630182) (end 356.805128 488.057555)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 08c6f66e-c5c0-4626-be2c-e271ee6ff1c5))
+  (gr_line (start 391.391216 467.656689) (end 378.300988 462.692221)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 0a937f4a-d483-4d16-bd62-aa99f0f80a4f))
+  (gr_line (start 391.391216 632.902567) (end 378.300988 637.867035)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 0af9fb27-4f84-484b-94f0-e1af344a8a69))
+  (gr_line (start 389.25 550.279628) (end 349.25 550.279628)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 0f144929-c77f-464e-bea2-8f7fb9c286a6))
+  (gr_line (start 455.29241 365.941868) (end 444.908714 375.332229)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 111a15f7-0d26-4f61-bf27-b76ccb423bf1))
+  (gr_line (start 454.742421 375.876624) (end 445.458704 365.397473)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 199c48bc-15d1-4d3b-aac0-d10e19c4488e))
+  (gr_line (start 500.969501 756.590882) (end 494.463377 768.987266)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 1c09aa9d-4c0f-4ef5-9f4d-6165f3588dc6))
+  (gr_line (start 417.494759 417.920542) (end 405.972985 409.967636)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 2b3c2335-fd38-40de-b822-30be69a24bb2))
+  (gr_line (start 577.910463 292.175321) (end 582.73193 331.883676)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 4457304b-3b3a-4142-9195-4d4acba42466))
+  (gr_line (start 491.485314 759.599546) (end 503.947563 765.978602)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 4a7f0f18-91f4-417a-a608-886b3e721662))
+  (gr_line (start 377.948832 522.194582) (end 364.050908 520.507068)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 4eba9374-9683-4a62-b85d-c4cbf26d2e74))
+  (gr_line (start 454.742421 724.682632) (end 445.458704 735.161783)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 5a174f95-e31c-4373-bff3-7371e73f89cd))
+  (gr_line (start 582.73193 768.67558) (end 577.910463 808.383935)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 5ea5e85e-1e14-4453-a6f9-c418ba7a0d9c))
+  (gr_line (start 589.25 291.05) (end 589.25 331.191647)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 6073bb3c-b620-4eb5-8614-5f9c03d8ba4e))
+  (gr_line (start 461.553166 336.303823) (end 484.275756 369.223178)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 6561d90d-0a0f-4305-a450-fafa7da3ec52))
+  (gr_line (start 377.948832 578.364674) (end 364.050908 580.052188)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 66c35251-b921-48b0-929e-333e378c65fd))
+  (gr_line (start 553.48945 776.509071) (end 550.139031 790.102257)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 7119fce6-5e79-4726-abc8-8398f943572a))
+  (gr_line (start 553.48945 324.050185) (end 550.139031 310.456999)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 78c64820-64b4-46a1-a505-8518b2b6cbd0))
+  (gr_line (start 531.236925 755.983201) (end 517.052729 793.383851)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 78fdaf39-aeac-4f13-b5dc-73276518a9e0))
+  (gr_line (start 379.031433 429.451603) (end 414.449674 448.04053)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp 7bb8276f-3145-4e5a-924b-8e6971b318b3))
+  (gr_line (start 415.651224 408.142851) (end 407.81652 419.745326)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 83dd2406-8797-4b26-9772-7d9ac36c0292))
+  (gr_line (start 589.25 769.367609) (end 589.25 809.509256)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 876057db-0744-45d6-9a4b-2c416c41ae9f))
+  (gr_line (start 558.593353 315.508988) (end 545.035129 318.998196)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 8dea1ecf-9a4c-42e8-ae25-c434bd6395d3))
+  (gr_line (start 503.881051 334.453926) (end 491.551827 341.086438)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 937c4733-106d-42d6-b811-4c8431f2e2a1))
+  (gr_arc (start 589.25 769.367609) (mid 389.250951 550.279628) (end 589.25 331.191647)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 93a7f498-1d7d-4984-8300-bb66458c651d))
+  (gr_line (start 382.297087 628.865405) (end 387.395117 641.904197)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 93fc4a11-c11a-4d25-801f-1af1eabefaf3))
+  (gr_line (start 545.000877 781.700024) (end 558.627604 784.911305)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp 96e78806-63ff-4319-b30b-f3071818f0fb))
+  (gr_line (start 370.085118 572.268458) (end 371.914622 586.148405)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp a33b4b59-f7df-4bc2-a8e9-841a87486f8b))
+  (gr_line (start 407.698733 680.895232) (end 415.769011 692.335102)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp b933378e-d594-4564-926b-a1cbbb0d489a))
+  (gr_arc (start 589.25 809.509256) (mid 349.25 550.279628) (end 589.25 291.05)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp bcc77678-3339-4bbf-8f82-b7d79ba5ac67))
+  (gr_line (start 484.275756 731.336078) (end 461.553166 764.255433)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp c1b70535-01e5-4bd4-a7df-f0f93657091b))
+  (gr_line (start 395.6428 602.929074) (end 356.805128 612.501701)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp d47d12b4-2aa4-4bd2-b835-7d506daf1fb5))
+  (gr_line (start 531.236925 344.576055) (end 517.052729 307.175405)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp d7a86edd-03bf-413b-8c71-1d5bfb21ce81))
+  (gr_line (start 417.494759 682.638714) (end 405.972985 690.59162)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp df2299f7-71f7-4e2c-a98c-ea2c797f6a9c))
+  (gr_line (start 500.969501 343.968374) (end 494.463377 331.57199)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp e31d1f9b-f366-40ed-8345-abbcd9b6d293))
+  (gr_line (start 444.813807 725.334156) (end 455.387317 734.510259)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp e3db6dce-d224-4c17-817e-6eee223bfa0f))
+  (gr_line (start 387.261296 458.604308) (end 382.430908 471.744603)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp e6b2f741-6de9-4fec-ab5f-0e16fc3ecace))
+  (gr_line (start 371.772544 514.3936) (end 370.227197 528.308049)
+    (stroke (width 0.13) (type solid)) (layer "F.SilkS") (tstamp ebb1f068-e2e9-4d46-a0cb-f6538a1166e7))
+  (gr_line (start 444.577636 404.392643) (end 414.637206 377.867737)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp f1f6ff59-9c32-4357-9dcf-2f4294b478f1))
+  (gr_line (start 414.449674 652.518726) (end 379.031433 671.107653)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp f56d4120-2386-4914-a433-b274704d85b1))
+  (gr_line (start 444.577636 696.166613) (end 414.637206 722.691519)
+    (stroke (width 0.2) (type solid)) (layer "F.SilkS") (tstamp f9297b2a-94e2-48cf-8d97-61db3d069564))
+  (gr_arc (start 589.28 809.538432) (mid 349.28 550.308804) (end 589.28 291.079176)
+    (stroke (width 0.13) (type solid)) (layer "Edge.Cuts") (tstamp 1c1be8ae-d4f2-4155-80f6-5cac4da5490d))
+  (gr_line (start 589.28 769.396785) (end 589.28 809.538432)
+    (stroke (width 0.13) (type solid)) (layer "Edge.Cuts") (tstamp 412f228b-09ae-45ff-b755-91687590a640))
+  (gr_line (start 589.28 291.079176) (end 589.28 331.220823)
+    (stroke (width 0.13) (type solid)) (layer "Edge.Cuts") (tstamp bf0abf7e-c9dc-4aa2-8d55-292e97084812))
+  (gr_arc (start 589.28 769.396785) (mid 389.280951 550.308804) (end 589.28 331.220823)
+    (stroke (width 0.13) (type solid)) (layer "Edge.Cuts") (tstamp d407ea3e-0bf0-4ee7-b64a-1dcfdde31357))
+
+  (group "" (id 498b59aa-d388-44b4-98fa-856be9c3f94a)
+    (members
+      08c6f66e-c5c0-4626-be2c-e271ee6ff1c5
+      0a937f4a-d483-4d16-bd62-aa99f0f80a4f
+      0af9fb27-4f84-484b-94f0-e1af344a8a69
+      0f144929-c77f-464e-bea2-8f7fb9c286a6
+      111a15f7-0d26-4f61-bf27-b76ccb423bf1
+      199c48bc-15d1-4d3b-aac0-d10e19c4488e
+      1c09aa9d-4c0f-4ef5-9f4d-6165f3588dc6
+      2b3c2335-fd38-40de-b822-30be69a24bb2
+      4457304b-3b3a-4142-9195-4d4acba42466
+      4a7f0f18-91f4-417a-a608-886b3e721662
+      4eba9374-9683-4a62-b85d-c4cbf26d2e74
+      5a174f95-e31c-4373-bff3-7371e73f89cd
+      5ea5e85e-1e14-4453-a6f9-c418ba7a0d9c
+      6073bb3c-b620-4eb5-8614-5f9c03d8ba4e
+      6561d90d-0a0f-4305-a450-fafa7da3ec52
+      66c35251-b921-48b0-929e-333e378c65fd
+      7119fce6-5e79-4726-abc8-8398f943572a
+      78c64820-64b4-46a1-a505-8518b2b6cbd0
+      78fdaf39-aeac-4f13-b5dc-73276518a9e0
+      7bb8276f-3145-4e5a-924b-8e6971b318b3
+      83dd2406-8797-4b26-9772-7d9ac36c0292
+      876057db-0744-45d6-9a4b-2c416c41ae9f
+      8dea1ecf-9a4c-42e8-ae25-c434bd6395d3
+      937c4733-106d-42d6-b811-4c8431f2e2a1
+      93a7f498-1d7d-4984-8300-bb66458c651d
+      93fc4a11-c11a-4d25-801f-1af1eabefaf3
+      96e78806-63ff-4319-b30b-f3071818f0fb
+      a33b4b59-f7df-4bc2-a8e9-841a87486f8b
+      b933378e-d594-4564-926b-a1cbbb0d489a
+      bcc77678-3339-4bbf-8f82-b7d79ba5ac67
+      c1b70535-01e5-4bd4-a7df-f0f93657091b
+      d47d12b4-2aa4-4bd2-b835-7d506daf1fb5
+      d7a86edd-03bf-413b-8c71-1d5bfb21ce81
+      df2299f7-71f7-4e2c-a98c-ea2c797f6a9c
+      e31d1f9b-f366-40ed-8345-abbcd9b6d293
+      e3db6dce-d224-4c17-817e-6eee223bfa0f
+      e6b2f741-6de9-4fec-ab5f-0e16fc3ecace
+      ebb1f068-e2e9-4d46-a0cb-f6538a1166e7
+      f1f6ff59-9c32-4357-9dcf-2f4294b478f1
+      f56d4120-2386-4914-a433-b274704d85b1
+      f9297b2a-94e2-48cf-8d97-61db3d069564
+    )
+  )
+  (group "" (id d88db5f0-a557-46d9-816d-cbe90f2750e5)
+    (members
+      1c1be8ae-d4f2-4155-80f6-5cac4da5490d
+      412f228b-09ae-45ff-b755-91687590a640
+      bf0abf7e-c9dc-4aa2-8d55-292e97084812
+      d407ea3e-0bf0-4ee7-b64a-1dcfdde31357
+    )
+  )
 )

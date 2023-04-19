@@ -13,15 +13,11 @@ from paho.mqtt import MQTTException
 from requests.exceptions import SSLError
 import logging
 
-#TODO: some choices that we need to make at some point will determine our options for dealing with applications adn api keys
 TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'}]
 #TTN_APPLICATIONS = [{'test-app-01-rotterdam': 'NNSXS.R5WETWDQQOUQ64SWECAL3Z4HKM3SKS43KIVOI2Q.QF4PQ5CV3HFKEXZLKEFCODRMKMMQK4N3EBVYFD2RGTJK5AL2TWLA'},
 #                    {'aware-poc': 'NNSXS.D5GHD6SO44VPDOLNV2QYAENOCIFLWVB4C6NP4VQ.NSMH63X3P55JWUD6NF3MGTQ6KAQ5CMO4MFSA246WZHTS7ZNA6HFA'}]
 TTN_MQTT_HOST = 'eu1.cloud.thethings.network'
 TTN_MQTT_PORT = 1883
-
-# DOWNLINK_SEND = 0
-# DOWNLINK_RECEIVED = 1
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -99,62 +95,89 @@ class Device:
         self.dev_id = dev_id
         self.location = location
         self.aq_api_key = aq_api_key
-        # self.do_send_downlink = True
         self.nowcast = 0
-        self.futurecast = 0
+        self.forcast = 0
         self.aq_loookup = aq_lookup
         self._daqi_order = ['no2', 'o3', 'pm10', 'pm25']
 
     def __repr__(self):
         return f'device eui: {self.dev_eui}, device id: {self.dev_id}, location: {self.location}'
 
+    def make_request(self, url, timeout=5.0):
+        resData = {}
+        logger.info(f'attempting request from {url}')
+        try:
+            response = requests.get(url, timeout=timeout)
+            resData = response.json()
+            logger.info(f'request retured with status {response.status_code}')
+            logger.debug(f'received response: {response}')
+            logger.debug(f'received data: {json.dumps(resData, indent=4)}')
+        except requests.exceptions.HTTPError as errh:
+            logger.error("Http Error:",errh)
+            return {}
+        except requests.exceptions.ConnectionError as errc:
+            logger.error("Error Connecting:",errc)
+            return {}
+        except requests.exceptions.Timeout as errt:
+            logger.error("Timeout Error:",errt)
+            return {}
+        except requests.exceptions.RequestException as err:
+            logger.error("Oops: Something Else",err)
+            return {}
+
+        return resData
+
     def set_nowcast(self):
         if self.location is not None:
             timestamp = datetime.datetime.utcnow()
             timestamp = timestamp - datetime.timedelta(hours=1)
             timestamp = timestamp.strftime('%Y-%m-%dT%H:%M:%SZ')
-            #print(timestamp)
             url = f'https://swift-exposure.nw.r.appspot.com/exposure/london/coord?key={self.aq_api_key}&lat={self.location.lat}&lng={self.location.lon}&species=no2,o3,pm10,pm25&timestamp={timestamp}&weighted=1'
            
-            jsonData = {}
-            logger.debug("attempt request from air quality API")
-            try:
-                response = requests.get(url, timeout=20.0)
-                jsonData = response.json()
-                logger.debug(f'received response: {response}')
-                logger.debug(f'received data: {json.dumps(response.json(), indent=4)}')
-            except requests.exceptions.HTTPError as errh:
-                logger.error("Http Error:",errh)
-                return
-            except requests.exceptions.ConnectionError as errc:
-                logger.error("Error Connecting:",errc)
-                return
-            except requests.exceptions.Timeout as errt:
-                logger.error("Timeout Error:",errt)
-                return
-            except requests.exceptions.RequestException as err:
-                logger.error("OOps: Something Else",err)
-                return
+            jsonData = self.make_request(url)
 
-            logger.debug(f'API RESPONSE : {json.dumps(jsonData, indent=4)}')
-            #print(json.dumps(jsonData, indent=4))
             data = self.process_aq_data(jsonData)
             logger.debug(f'data: {data}')
             if len(data.keys()) == 0:
                 return
 
-            #print(data)
-            #nowcast = 0
             max_nowcast = 0
             for key in data:
                 daqi_level = self.aq_loookup.get_daqi_level(key, data[key])
                 max_nowcast = max(max_nowcast, daqi_level)
-                #offset = self._daqi_order.index(key) * 4
-                #nowcast += (daqi_level << offset)
-                #print(f'pollutant: {key}, level: {daqi_level}, bits: {bin(daqi_level)},  total: {nowcast}, bits: {bin(nowcast)}')
             
             self.nowcast = max_nowcast
-            #self.nowcast = nowcast
+
+    def set_forcast(self):
+        url = 'https://londonair.org.uk/data/cityair/CityAirForecast.asp'
+        jsonData = self.make_request(url)
+        forcast = self.process_forcast_data(jsonData)
+        if forcast != -1:
+            self.forcast = forcast
+        
+    def process_forcast_data(self, data):
+        results = -1
+        
+        try:
+            results = data['Forecasts'][1]['ForecastBand']
+            results = results.strip().lower()
+        except KeyError as err:
+            logger.error(f'key error on forcast data: {err}')
+            return -1
+        except IndexError as err:
+            logger.error(f'index error on forcast data: {err}')
+            return -1
+        
+        if results == 'low':
+            return 0
+        elif results == 'moderate':
+            return 1
+        elif results == 'high':
+            return 2
+        elif results == 'very high':
+            return 3
+        else:
+            return -1
 
     def process_aq_data(self, data):
         processed_data = {}
@@ -174,7 +197,7 @@ class Device:
     
     def get_air_quality(self):
         air_quality = self.nowcast
-        air_quality += (self.futurecast << 4)
+        air_quality += (self.forcast << 4)
         return air_quality
 
 class Application:
@@ -208,13 +231,6 @@ class Application:
         except requests.exceptions.RequestException as err:
             logger.error(f'could not connect to api, received error: {err}')
             return
-        #except requests.ConnectionError as err:
-        #    logger.error(f'could not connect to api, got error: {err}')
-        #    return
-        #except SSLError as err:
-        #    logger.error(f'ssl error: {err}')
-        #    return
-        
 
         if response.status_code == 200:
             data = response.json()
@@ -256,6 +272,7 @@ class Application:
             logger.debug(f'setting air quality for device: {key}')
             device = self.devices[key]
             device.set_nowcast()
+            device.set_forcast()
 
 
 def on_connect(client, userdata, flags, rc):

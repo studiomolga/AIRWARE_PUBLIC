@@ -34,4 +34,4 @@ fp-info-cache
 # others
 *.log
 .~lock.*
-
+*.zip

@@ -281,6 +281,7 @@ void onEvent (ev_t ev) {
         txInterval = TX_INTERVAL_LONG;
         stateMachine.setState(RECEIVED);
       } else {
+        tries++;
         if(tries < MAX_TRIES){
           txInterval = TX_INTERVAL_SHORT;  
         } else {
@@ -378,7 +379,7 @@ void setup() {
 
   // setup servo
   servo.attach(SERVO_PIN);
-  servo.write(1);
+  servo.write(179);
   delay(1000);
 //  digitalWrite(SERVO_ENABLE_PIN, LOW);
   servo.detach();
@@ -402,7 +403,7 @@ void setup() {
 void sendInit() {
   Serial.println(F("SEND"));
   loops = 0;
-  tries++;
+//  tries++;
   do_send(&sendjob);
 }
 
@@ -421,7 +422,7 @@ void receivedInit() {
   Serial.println(futurecast);
 
   // calculate new servo position
-  servoPos = ((178 / LED_NOW_AMT) * nowcast) + 1;
+  servoPos = abs((((178 / LED_NOW_AMT) * nowcast) + 1) - 179);
 
   Serial.print(F("new servo pos to reach: "));
   Serial.println(servoPos);
@@ -459,8 +460,9 @@ void receivedLoop() {
   uint32_t currMillis = millis();
   
   if(servoPos == currServoPos){
-    stateMachine.setState(SLEEP);
     servo.detach();
+    delay(25); // lets give it some time to adjust
+    stateMachine.setState(SLEEP);
 //    digitalWrite(SERVO_ENABLE_PIN, LOW);
     return;
   }

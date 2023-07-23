@@ -106,14 +106,24 @@ uint8_t nowcastLEDMatrix[LED_NOW_AMT][2][5] = {
   { { INPUT, OUTPUT, INPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW, LOW, LOW  } }  // 13
 };
 
+//uint8_t futurecastLEDMatrix[LED_FUTURE_AMT][2][3] = {
+//  //           PIN_CONFIG                  PIN_STATE
+//  //    A       B       C         A     B    C  
+//  { { OUTPUT, OUTPUT, INPUT }, { HIGH, LOW, LOW } }, //  1 
+//  { { OUTPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW } }, //  2
+//  { { INPUT, OUTPUT, OUTPUT }, { LOW, HIGH, LOW } }, //  3
+//  { { INPUT, OUTPUT, OUTPUT }, { LOW, LOW, HIGH } }  //  4
+//};
+
 uint8_t futurecastLEDMatrix[LED_FUTURE_AMT][2][3] = {
   //           PIN_CONFIG                  PIN_STATE
   //    A       B       C         A     B    C  
-  { { OUTPUT, OUTPUT, INPUT }, { HIGH, LOW, LOW } }, //  1 
-  { { OUTPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW } }, //  2
-  { { INPUT, OUTPUT, OUTPUT }, { LOW, HIGH, LOW } }, //  3
-  { { INPUT, OUTPUT, OUTPUT }, { LOW, LOW, HIGH } }  //  4
+  { { INPUT, OUTPUT, OUTPUT }, { LOW, LOW, HIGH } }, //  1
+  { { INPUT, OUTPUT, OUTPUT }, { LOW, HIGH, LOW } }, //  2
+  { { OUTPUT, OUTPUT, INPUT }, { LOW, HIGH, LOW } }, //  3
+  { { OUTPUT, OUTPUT, INPUT }, { HIGH, LOW, LOW } }  //  4
 };
+
 
 static uint8_t data[] = { 0 };    //we just send an ID every minute, this ID is registered in a database with all the things needed for making the api call and sending data back
 static osjob_t sendjob;
